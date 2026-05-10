@@ -10,6 +10,7 @@
   "keywords": [],
   "author": "Nova",
   "license": "MIT",
+  "type": "module",
   "dependencies": {
     "airtable": "^0.12.2",
     "dotenv": "^17.4.2"

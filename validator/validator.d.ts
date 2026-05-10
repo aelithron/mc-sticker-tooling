@@ -1,0 +1,14 @@
+export type Entry = {
+  recordID: string,
+  slackID: string,
+  mcName: string,
+  slackName: string,
+  createdAt: Date,
+  address: {
+    street: string,
+    city: string,
+    state: string,
+    country: string,
+    zip: string
+  }
+}
