@@ -14,7 +14,8 @@ export type Entry = {
 }
 export type Verdict = {
   approved: boolean,
-  errors: string[]
+  errors: string[],
+  correctionNeeded: boolean
 }
 export type DedupeCache = {
   recordID: string,

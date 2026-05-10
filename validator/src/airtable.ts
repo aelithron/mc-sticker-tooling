@@ -19,7 +19,7 @@ export default async function loadTable(): Promise<Entry[]> {
             city: item.get("City") as string,
             state: item.get("State") as string,
             country: item.get("Country") as string,
-            zip: item.get("Zip Code") as string,
+            zip: item.get("Zip Code") as string
           }
         });
       }
@@ -70,8 +70,19 @@ export async function enterVerdict(recordID: string, verdict: Verdict) {
     try {
       await fetch(`https://airtable.com/${process.env.AIRTABLE_BASE_ID}/${process.env.AIRTABLE_TABLE_ID}/${recordID}/comments`, { method: "POST", headers: { "Authorization": `Bearer ${process.env.AIRTABLE_API_KEY}` }, body: JSON.stringify({ text: `[script] Errors:\n${verdict.errors.join("\n")}` }) });
     } catch (e) {
-
+      throw new Error(`Error on Record ${entry.recordID} - Airtable API:\n${e}`);
     }
   }
   */
+}
+export async function correctEntry(entry: Entry) {
+  const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
+  let slackAPI;
+  try {
+    slackAPI = await fetch(`https://slack.com/api/users.info?user=${entry.slackID}`, { headers: { "Authorization": `Bearer ${process.env.SLACK_BOT_TOKEN}` } });
+  } catch (e) { throw new Error(`Error on Record ${entry.recordID} - Slack API:\n${e}`); }
+  const slackBody = await slackAPI.json();
+  if (!slackAPI.ok || slackBody.error) throw new Error(`Error on Record ${entry.recordID} - Slack API:\n${slackBody.error || `Unknown error - HTTP ${slackAPI.status}`}`);
+  //table.update(entry.recordID, { "Slack Username": slackBody.user.profile.display_name });
+  console.log(`Corrected Record ${entry.recordID}! (Slack Username: ${entry.slackName} -> ${slackBody.user.profile.display_name})`);
 }

@@ -1,6 +1,7 @@
 import type { DedupeCache, Entry, Verdict } from "../validator.js";
 export default async function check(entry: Entry, caches: { airtable: DedupeCache[] }): Promise<Verdict> {
   const errors: string[] = [];
+  let correctionNeeded = false;
   const filteredCache = caches.airtable.filter((item) => entry.recordID !== item.recordID)
   if (filteredCache.find((item) => item.mcName === entry.mcName)) errors.push(`This record shares a Minecraft username with "${filteredCache.find((item) => item.mcName === entry.mcName)?.recordID}", likely duplicate!`);
   if (filteredCache.find((item) => item.slackID === entry.slackID)) errors.push(`This record shares a Slack ID with "${filteredCache.find((item) => item.slackID === entry.slackID)?.recordID}", likely duplicate!`);
@@ -38,6 +39,8 @@ export default async function check(entry: Entry, caches: { airtable: DedupeCach
     if (slackBody.error === "user_not_found") {
       errors.push(`Slack ID "${entry.slackID}" doesn't exist!`);
     } else throw new Error(`Error on Record ${entry.recordID} - Slack API:\n${slackBody.error}`);
+  } else {
+    if (slackBody.user.profile.display_name !== entry.slackName) correctionNeeded = true;
   }
-  return { approved: (errors.length === 0), errors }
+  return { approved: (errors.length === 0), errors, correctionNeeded }
 }

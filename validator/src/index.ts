@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import loadTable, { enterVerdict, loadCaches } from "./airtable.js";
+import loadTable, { correctEntry, enterVerdict, loadCaches } from "./airtable.js";
 import check from "./checker.js";
 dotenv.config({ quiet: true });
 async function start() {
@@ -11,7 +11,8 @@ async function start() {
     try {
       const verdict = await check(item, caches);
       await enterVerdict(item.recordID, verdict);
-      console.log({ recordID: item.recordID, ...verdict });
+      //console.log({ recordID: item.recordID, ...verdict });
+      if (verdict.correctionNeeded) await correctEntry(item);
     } catch (e) {
       console.error(e);
       continue;
