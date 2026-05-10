@@ -1,5 +1,5 @@
 import Airtable from "airtable";
-import type { Entry } from "../validator.js";
+import type { DedupeCache, Entry } from "../validator.js";
 
 export default async function loadTable(): Promise<Entry[]> {
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
@@ -32,4 +32,28 @@ export default async function loadTable(): Promise<Entry[]> {
       resolve(entries);
     });
   });
+}
+export async function loadCaches(): Promise<{ airtable: DedupeCache[] }> {
+  const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
+  const res = table.select({ fields: ["Slack ID", "Minecraft username"] });
+  const dedupeCache: DedupeCache[] = await new Promise((resolve, reject) => {
+    const airtableCache: DedupeCache[] = [];
+    res.eachPage((records, fetchNextPage) => {
+      for (const item of records) {
+        airtableCache.push({
+          recordID: item.id,
+          slackID: item.get("Slack ID") as string,
+          mcName: item.get("Minecraft username") as string
+        });
+      }
+      fetchNextPage();
+    }, function done(err) {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(airtableCache);
+    });
+  });
+  return { airtable: dedupeCache }
 }

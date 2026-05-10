@@ -16,3 +16,8 @@ export type Verdict = {
   approved: boolean,
   errors: string[]
 }
+export type DedupeCache = {
+  recordID: string,
+  slackID: string,
+  mcName: string
+}

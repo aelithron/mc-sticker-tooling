@@ -1,6 +1,9 @@
-import type { Entry, Verdict } from "../validator.js";
-export default async function check(entry: Entry): Promise<Verdict> {
+import type { DedupeCache, Entry, Verdict } from "../validator.js";
+export default async function check(entry: Entry, caches: { airtable: DedupeCache[] }): Promise<Verdict> {
   const errors: string[] = [];
+  const filteredCache = caches.airtable.filter((item) => entry.recordID !== item.recordID)
+  if (filteredCache.find((item) => item.mcName === entry.mcName)) errors.push(`This record shares a Minecraft username with "${filteredCache.find((item) => item.mcName === entry.mcName)?.recordID}", likely duplicate!`);
+  if (filteredCache.find((item) => item.slackID === entry.slackID)) errors.push(`This record shares a Slack ID with "${filteredCache.find((item) => item.slackID === entry.slackID)?.recordID}", likely duplicate!`);
   if (!entry.mcName.startsWith(".")) {
     let mojangAPI;
     try {
