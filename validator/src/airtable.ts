@@ -83,6 +83,6 @@ export async function correctEntry(entry: Entry) {
   } catch (e) { throw new Error(`Error on Record ${entry.recordID} - Slack API:\n${e}`); }
   const slackBody = await slackAPI.json();
   if (!slackAPI.ok || slackBody.error) throw new Error(`Error on Record ${entry.recordID} - Slack API:\n${slackBody.error || `Unknown error - HTTP ${slackAPI.status}`}`);
-  //table.update(entry.recordID, { "Slack Username": slackBody.user.profile.display_name });
-  console.log(`Corrected Record ${entry.recordID}! (Slack Username: ${entry.slackName} -> ${slackBody.user.profile.display_name})`);
+  //table.update(entry.recordID, { "Slack Username": (slackBody.user.profile.display_name !== "" ? slackBody.user.profile.display_name : slackBody.user.profile.real_name) });
+  console.log(`Corrected Record ${entry.recordID}! (Slack Username: ${entry.slackName} -> ${slackBody.user.profile.display_name !== "" ? slackBody.user.profile.display_name : slackBody.user.profile.real_name})`);
 }

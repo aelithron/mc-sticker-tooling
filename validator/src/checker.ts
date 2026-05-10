@@ -1,3 +1,4 @@
+import { setTimeout } from "node:timers/promises";
 import type { DedupeCache, Entry, Verdict } from "../validator.js";
 export default async function check(entry: Entry, caches: { airtable: DedupeCache[] }): Promise<Verdict> {
   const errors: string[] = [];
@@ -8,14 +9,22 @@ export default async function check(entry: Entry, caches: { airtable: DedupeCach
   if (entry.mcName) {
     if (!entry.mcName.startsWith(".")) {
       let mojangAPI;
-      try {
-        mojangAPI = await fetch(`https://api.mojang.com/users/profiles/minecraft/${entry.mcName}`);
-      } catch (e) { throw new Error(`Error on Record ${entry.recordID} - Mojang API:\n${e}`); }
-      const mojangBody = await mojangAPI.json();
-      if (!mojangAPI.ok || mojangBody.errorMessage) {
-        if ((mojangBody.errorMessage as string).includes("Couldn't find any profile with name")) {
-          errors.push(`Minecraft username "${entry.mcName}" doesn't exist!`);
-        } else throw new Error(`Error on Record ${entry.recordID} - Mojang API:\n${mojangBody.errorMessage}`);
+      for (let i = 0; i < 3; i++) {
+        try {
+          mojangAPI = await fetch(`https://api.mojang.com/users/profiles/minecraft/${entry.mcName}`);
+        } catch (e) { throw new Error(`Error on Record ${entry.recordID} - Mojang API:\n${e}`); }
+        if (mojangAPI.status === 429) {
+          console.log("Pausing for Mojang API rate limit...");
+          await setTimeout(5000);
+          continue;
+        }
+        const mojangBody = await mojangAPI.json();
+        if (!mojangAPI.ok || mojangBody.errorMessage) {
+          if ((mojangBody.errorMessage as string).includes("Couldn't find any profile with name")) {
+            errors.push(`Minecraft username "${entry.mcName}" doesn't exist!`);
+          } else throw new Error(`Error on Record ${entry.recordID} - Mojang API:\n${mojangBody.errorMessage}`);
+        }
+        break;
       }
     } else {
       let geyserAPI;
@@ -26,7 +35,7 @@ export default async function check(entry: Entry, caches: { airtable: DedupeCach
       if (!geyserAPI.ok) {
         if ((geyserBody.message as string).includes("Unable to find user in our cache. Please try specifying their Floodgate UUID instead")) {
           errors.push(`Minecraft username "${entry.mcName}" (Bedrock) doesn't exist!`);
-        } else throw new Error(`Error on Record ${entry.recordID} - Geyser API:\n${geyserBody.message}`); 
+        } else throw new Error(`Error on Record ${entry.recordID} - Geyser API:\n${geyserBody.message}`);
       }
     }
   } else errors.push("This record is missing a Minecraft username!");
@@ -40,7 +49,7 @@ export default async function check(entry: Entry, caches: { airtable: DedupeCach
       errors.push(`Slack ID "${entry.slackID}" doesn't exist!`);
     } else throw new Error(`Error on Record ${entry.recordID} - Slack API:\n${slackBody.error}`);
   } else {
-    if (slackBody.user.profile.display_name !== entry.slackName) correctionNeeded = true;
+    if (entry.slackName !== (slackBody.user.profile.display_name !== "" ? slackBody.user.profile.display_name : slackBody.user.profile.real_name)) correctionNeeded = true;
   }
   return { approved: (errors.length === 0), errors, correctionNeeded }
 }
