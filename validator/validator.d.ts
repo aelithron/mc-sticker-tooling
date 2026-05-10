@@ -12,3 +12,7 @@ export type Entry = {
     zip: string
   }
 }
+export type Verdict = {
+  approved: boolean,
+  errors: string[]
+}
