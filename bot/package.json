@@ -1,0 +1,21 @@
+{
+  "name": "hackclubmc-sticker-bot",
+  "version": "1.0.0",
+  "description": "A Slack bot to message people about the free stickers from the Hack Club Minecraft server.",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon -w package.json -w src -x 'tsx' --delay 2.5s ./src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Nova",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@10.32.1",
+  "dependencies": {
+    "@slack/bolt": "^4.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.8.0"
+  }
+}
