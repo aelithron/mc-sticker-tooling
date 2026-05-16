@@ -3,7 +3,7 @@ import type { Entry } from "../bot.js";
 
 export default async function loadTable(): Promise<Entry[]> {
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
-  const res = table.select({ filterByFormula: "{Approval}='Approved'" });
+  const res = table.select({ filterByFormula: "AND({Approval}='Approved', {Fulfilled}=0, {Sent DM}=0)" });
   const entries: Entry[] = [];
   return new Promise((resolve, reject) => {
     res.eachPage((records, fetchNextPage) => {
@@ -32,4 +32,16 @@ export default async function loadTable(): Promise<Entry[]> {
       resolve(entries);
     });
   });
+}
+export async function setSentDMs(records: string[]) {
+  const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
+  for (let i = 0; i < records.length; i += 10) {
+    const batch = records.slice(i, i + 10);
+    try {
+      await table.update(batch.map(id => ({ id, fields: { "Sent DM": true }})));
+    } catch (e) {
+      console.error(`Airtable Error - Couldn't mark some records as having been sent DMs, please do these manually!\nRecord IDs: ${batch}\n${e}`);
+      continue;
+    }
+  }
 }

@@ -1,6 +1,6 @@
 import { App } from "@slack/bolt";
 import dotenv from "dotenv";
-import loadTable from "./airtable.js";
+import loadTable, { setSentDMs } from "./airtable.js";
 
 let app: App;
 async function start() {
