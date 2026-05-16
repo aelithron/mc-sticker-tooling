@@ -4,7 +4,7 @@
   "description": "A Slack bot to message people about the free stickers from the Hack Club Minecraft server.",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "nodemon -w package.json -w src -x 'tsx' --delay 2.5s ./src/index.ts",
+    "dev": "nodemon -w package.json -w src -x tsx --delay 2.5s ./src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,9 +13,13 @@
   "type": "module",
   "packageManager": "pnpm@10.32.1",
   "dependencies": {
-    "@slack/bolt": "^4.7.2"
+    "@slack/bolt": "^4.7.2",
+    "airtable": "^0.12.2",
+    "dotenv": "^17.4.2"
   },
   "devDependencies": {
-    "@types/node": "^25.8.0"
+    "@types/node": "^25.8.0",
+    "nodemon": "^3.1.14",
+    "tsx": "^4.22.0"
   }
 }
