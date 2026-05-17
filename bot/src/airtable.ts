@@ -1,5 +1,5 @@
 import Airtable from "airtable";
-import type { Address, Entry } from "../bot.js";
+import type { AddressEdit, Entry } from "../bot.js";
 
 export default async function loadTable(): Promise<Entry[]> {
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
@@ -71,14 +71,13 @@ export async function setSentDMs(records: string[]) {
     }
   }
 }
-export async function updateAddress(recordID: string, address: Address): Promise<boolean> {
+export async function updateAddress(recordID: string, address: AddressEdit): Promise<boolean> {
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
   try {
     await table.update(recordID, {
       "Street Address": address.street,
       "City": address.city,
       "State": address.state,
-      "Country": address.country,
       "Zip Code": address.zip,
       "Mailing Name": address.name
     });

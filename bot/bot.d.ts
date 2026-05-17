@@ -15,3 +15,10 @@ export type Address = {
   zip: string,
   name: string
 }
+export type AddressEdit = {
+  street: string | undefined,
+  city: string | undefined,
+  state: string | undefined,
+  zip: string | undefined,
+  name: string | undefined
+}
