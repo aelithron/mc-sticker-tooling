@@ -54,6 +54,22 @@ async function start() {
       return;
     }
     await updateStatus(entry.recordID, "Confirmed");
+    const blocks: any[] = (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions");
+    blocks.push({ type: "divider" });
+    blocks.push({
+      type: "rich_text", elements: [{
+        type: "rich_text_section",
+        elements: [
+          { type: "text", text: "Status", style: { bold: true } },
+          { type: "text", text: ": " },
+          { type: "emoji", name: "white_check_mark", unicode: "2705" },
+          { type: "text", text: " Confirmed   |   If you still need to make changes, please DM " },
+          { type: "user", user_id: "U08RJ1PEM7X" },
+          { type: "text", text: "." }
+        ]
+      }]
+    });
+    await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks });
     await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id!, text: `Thanks! Your address and name have been confirmed, and your stickers will be mailed soon.\nIf you need to make any more changes, please message <@${process.env.OWNER_ID || "U08RJ1PEM7X"}>.` });
   });
   app.action("hcmc-edit", async ({ ack, action, body, client }) => {
@@ -91,6 +107,22 @@ async function start() {
       return;
     }
     await updateStatus(entry.recordID, "Cancelled");
+    const blocks: any[] = (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions");
+    blocks.push({ type: "divider" });
+    blocks.push({
+      type: "rich_text", elements: [{
+        type: "rich_text_section",
+        elements: [
+          { type: "text", text: "Status", style: { bold: true } },
+          { type: "text", text: ": " },
+          { type: "emoji", name: "x", unicode: "274c" },
+          { type: "text", text: " Cancelled   |   If you still need to make changes, please DM " },
+          { type: "user", user_id: "U08RJ1PEM7X" },
+          { type: "text", text: "." }
+        ]
+      }]
+    });
+    await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks });
     await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id!, text: `Thanks! Your sticker request has been cancelled, and you won't be mailed stickers.\nIf this was done in error, please message <@${process.env.OWNER_ID || "U08RJ1PEM7X"}> to restore your request.` });
   });
 }
