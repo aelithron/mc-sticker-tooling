@@ -11,7 +11,6 @@ async function start() {
     try {
       const verdict = await check(item, caches);
       await enterVerdict(item.recordID, verdict);
-      //console.log({ recordID: item.recordID, ...verdict });
       if (verdict.correctionNeeded) await correctEntry(item);
     } catch (e) {
       console.error(e);
