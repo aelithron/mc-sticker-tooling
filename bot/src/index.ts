@@ -90,7 +90,7 @@ async function start() {
       await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id, text: `Your sticker request isn't able to be edited right now! If you still need to make changes, please message <@${process.env.OWNER_ID || "U08RJ1PEM7X"}>.` });
       return;
     }
-    await client.views.open({ trigger_id: body.trigger_id, view: createForm(entry, body.channel!.id, body.message!.ts )});
+    await client.views.open({ trigger_id: body.trigger_id, view: createForm(entry, body.channel!.id, body.message!.ts) });
   });
   app.action("hcmc-cancel", async ({ ack, action, body, client }) => {
     ack();
@@ -152,8 +152,8 @@ async function start() {
     }
     await updateAddress(entry.recordID, address);
     await updateStatus(entry.recordID, "Confirmed");
-    /*
-    const blocks: any[] = (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions");
+    const message = await client.conversations.history({ channel: data.channelID, latest: data.messageTs, inclusive: true, limit: 1 });
+    const blocks: any[] = (message.messages![0]?.blocks as { type: string }[]).filter((block) => block.type !== "actions");
     blocks.push({ type: "divider" });
     blocks.push({
       type: "rich_text", elements: [{
@@ -173,13 +173,25 @@ async function start() {
         type: "rich_text_section",
         elements: [
           { type: "text", text: "Edits Made", style: { bold: true } },
-          { type: "text", text: ": " }
+          { type: "text", text: ":\n" },
+        ]
+      },
+      {
+        type: "rich_text_list", style: "bullet", indent: 0, border: 0, elements: [
+          {
+            type: "rich_text_section",
+            elements: [
+              { type: "text", text: "Address: " },
+              { type: "text", text: "[redacted]", style: { code: true } },
+              { type: "text", text: `, ${address.city || entry.address.city}, ${address.state || entry.address.state}, ${entry.address.country}, ${address.zip || entry.address.zip}` }
+            ]
+          },
+          { type: "rich_text_section", elements: [{ type: "text", text: `Name on envelope: ${address.name || (entry.address.name || entry.slackName)}` }] }
         ]
       }]
     });
-    */
-    //await client.chat.update({ channel: body.!.id, ts: body.message!.ts, blocks });
-    //await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id!, text: `Thanks! Your address and name have been confirmed, and your stickers will be mailed soon.\nIf you need to make any more changes, please message <@${process.env.OWNER_ID || "U08RJ1PEM7X"}>.` });
+    await client.chat.update({ channel: data.channelID, ts: data.messageTs, blocks });
+    await client.chat.postEphemeral({ channel: data.channelID, user: body.user.id, text: `Thanks! Your details have been updated, and your stickers will be mailed soon.\nIf you need to make any more changes, please message <@${process.env.OWNER_ID || "U08RJ1PEM7X"}>.` });
   });
 }
 start();
