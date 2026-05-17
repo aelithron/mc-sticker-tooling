@@ -4,11 +4,13 @@ export type Entry = {
   mcName: string,
   slackName: string,
   createdAt: Date,
-  address: {
-    street: string,
-    city: string,
-    state: string,
-    country: string,
-    zip: string
-  }
+  address: Address
+}
+export type Address = {
+  street: string,
+  city: string,
+  state: string,
+  country: string,
+  zip: string,
+  name: string
 }

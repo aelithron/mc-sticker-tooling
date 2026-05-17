@@ -1,5 +1,5 @@
 import Airtable from "airtable";
-import type { Entry } from "../bot.js";
+import type { Address, Entry } from "../bot.js";
 
 export default async function loadTable(): Promise<Entry[]> {
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
@@ -19,7 +19,8 @@ export default async function loadTable(): Promise<Entry[]> {
             city: item.get("City") as string,
             state: item.get("State") as string,
             country: item.get("Country") as string,
-            zip: item.get("Zip Code") as string
+            zip: item.get("Zip Code") as string,
+            name: item.get("Mailing Name") as string
           }
         });
       }
@@ -38,10 +39,27 @@ export async function setSentDMs(records: string[]) {
   for (let i = 0; i < records.length; i += 10) {
     const batch = records.slice(i, i + 10);
     try {
-      await table.update(batch.map(id => ({ id, fields: { "Sent DM": true }})));
+      await table.update(batch.map(id => ({ id, fields: { "Sent DM": true } })));
     } catch (e) {
       console.error(`Airtable Error - Couldn't mark some records as having been sent DMs, please do these manually!\nRecord IDs: ${batch}\n${e}`);
       continue;
     }
+  }
+}
+export async function updateAddress(recordID: string, address: Address): Promise<boolean> {
+  const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
+  try {
+    await table.update(recordID, {
+      "Street Address": address.street,
+      "City": address.city,
+      "State": address.state,
+      "Country": address.country,
+      "Zip Code": address.zip,
+      "Mailing Name": address.name 
+    });
+    return true;
+  } catch (e) {
+    console.error(`Airtable Error - Couldn't update address for \n${e}`);
+    return false;
   }
 }
