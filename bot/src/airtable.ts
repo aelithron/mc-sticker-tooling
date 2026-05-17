@@ -34,6 +34,29 @@ export default async function loadTable(): Promise<Entry[]> {
     });
   });
 }
+export async function getEntry(recordID: string): Promise<Entry> {
+  const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
+  try {
+    const item = await table.find(recordID);
+    return {
+      recordID: item.id,
+      slackID: item.get("Slack ID") as string,
+      mcName: item.get("Minecraft username") as string,
+      slackName: item.get("Slack Username") as string,
+      createdAt: new Date(item.get("Created") as string),
+      address: {
+        street: item.get("Street Address") as string,
+        city: item.get("City") as string,
+        state: item.get("State") as string,
+        country: item.get("Country") as string,
+        zip: item.get("Zip Code") as string,
+        name: item.get("Mailing Name") as string
+      }
+    }
+  } catch (e) {
+    throw new Error(`Airtable Error - Couldn't find record ${recordID}\n${e}`);
+  }
+}
 export async function setSentDMs(records: string[]) {
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
   for (let i = 0; i < records.length; i += 10) {
@@ -55,11 +78,21 @@ export async function updateAddress(recordID: string, address: Address): Promise
       "State": address.state,
       "Country": address.country,
       "Zip Code": address.zip,
-      "Mailing Name": address.name 
+      "Mailing Name": address.name
     });
     return true;
   } catch (e) {
-    console.error(`Airtable Error - Couldn't update address for \n${e}`);
+    console.error(`Airtable Error - Couldn't update address for ${recordID}\n${e}`);
+    return false;
+  }
+}
+export async function cancelStickers(recordID: string) {
+  const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
+  try {
+    await table.update(recordID, { "Approval": "Cancelled" });
+    return true;
+  } catch (e) {
+    console.error(`Airtable Error - Couldn't cancel ${recordID}\n${e}`);
     return false;
   }
 }
