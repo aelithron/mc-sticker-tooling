@@ -2,6 +2,7 @@ import { App } from "@slack/bolt";
 import dotenv from "dotenv";
 import { sendDMs } from "./dms.js";
 import { getEntry, setSentDMs, updateStatus } from "./airtable.js";
+import createForm from "./forms.js";
 
 let app: App;
 async function start() {
@@ -88,7 +89,7 @@ async function start() {
       await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id, text: `Your sticker request isn't able to be edited right now! If you still need to make changes, please message <@${process.env.OWNER_ID || "U08RJ1PEM7X"}>.` });
       return;
     }
-
+    await client.views.open({ trigger_id: body.trigger_id, view: createForm(entry)});
   });
   app.action("hcmc-cancel", async ({ ack, action, body, client }) => {
     ack();

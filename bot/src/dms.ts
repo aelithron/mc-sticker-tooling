@@ -6,7 +6,6 @@ export async function sendDMs(app: App): Promise<{ sentTo: string[], errors: boo
   let sentTo: string[] = [];
   let errors = false;
   for (const entry of entries) {
-    console.log(entry);
     try {
       const dm = await app.client.conversations.open({ users: entry.slackID });
       await app.client.chat.postMessage({
