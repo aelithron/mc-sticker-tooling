@@ -90,7 +90,7 @@ async function start() {
       await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id, text: `Your sticker request isn't able to be edited right now! If you still need to make changes, please message <@${process.env.OWNER_ID || "U08RJ1PEM7X"}>.` });
       return;
     }
-    await client.views.open({ trigger_id: body.trigger_id, view: createForm(entry, body.channel!.id, body.message!.ts) });
+    await client.views.open({ trigger_id: body.trigger_id, view: await createForm(entry, body.channel!.id, body.message!.ts) });
   });
   app.action("hcmc-cancel", async ({ ack, action, body, client }) => {
     ack();
@@ -148,6 +148,7 @@ async function start() {
       city: view.state.values.city!.city_input!.value || undefined,
       state: view.state.values.state!.state_input!.value || undefined,
       zip: view.state.values.zip!.zip_input!.value || undefined,
+      country: view.state.values.country!.country_input!.selected_option!.value || undefined,
       name: view.state.values.name!.name_input!.value || undefined
     }
     await updateAddress(entry.recordID, address);

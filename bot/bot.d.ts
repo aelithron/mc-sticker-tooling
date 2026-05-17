@@ -19,6 +19,7 @@ export type AddressEdit = {
   street: string | undefined,
   city: string | undefined,
   state: string | undefined,
+  country: string | undefined,
   zip: string | undefined,
   name: string | undefined
 }

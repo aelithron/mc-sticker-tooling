@@ -79,6 +79,7 @@ export async function updateAddress(recordID: string, address: AddressEdit): Pro
       "City": address.city,
       "State": address.state,
       "Zip Code": address.zip,
+      "Country": address.country,
       "Mailing Name": address.name
     });
     return true;
@@ -95,5 +96,14 @@ export async function updateStatus(recordID: string, status: "Confirmed" | "Canc
   } catch (e) {
     console.error(`Airtable Error - Couldn't change status for ${recordID} to ${status}\n${e}`);
     return false;
+  }
+}
+export async function getCountries(): Promise<string[]> {
+  try {
+    const res = await fetch(`https://api.airtable.com/v0/meta/bases/${process.env.AIRTABLE_BASE_ID}/tables`, { method: "GET", headers: { "Authorization": `Bearer ${process.env.AIRTABLE_API_KEY}` } });
+    return (await res.json()).tables.find((t: { id: string }) => t.id === process.env.AIRTABLE_TABLE_ID).fields.find((f: { name: string }) => f.name === "Country").options.choices.map((c: { name: string }) => c.name);
+  } catch (e) {
+    console.error(`Airtable Error - Couldn't get country names\n${e}`);
+    return [];
   }
 }
