@@ -1,6 +1,7 @@
 import { App } from "@slack/bolt";
 import dotenv from "dotenv";
 import { sendDMs } from "./dms.js";
+import { getEntry, setSentDMs, updateStatus } from "./airtable.js";
 
 let app: App;
 async function start() {
@@ -34,6 +35,63 @@ async function start() {
     }
     const dms = await sendDMs(app);
     await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, markdown_text: `done!~ DMs sent to ${dms.sentTo.length} ${dms.sentTo.length !== 1 ? "people" : "person"}!${dms.errors ? "\nthere was at least one error, please check the bot console!" : ""}` });
+    //await setSentDMs(dms.sentTo);
+  });
+  app.action("hcmc-confirm", async ({ ack, action, body, client }) => {
+    ack();
+    if (action.type !== "button" || body.type !== "block_actions") return;
+    if (!action.value) {
+      app.logger.error(`Action ${body.actions[0]?.action_id} didn't pass a value (when it should have given an Airtable record ID)!`);
+      return;
+    }
+    const entry = await getEntry(action.value);
+    if (entry.slackID !== body.user.id) {
+      await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id, text: `you aren't who this button is meant for! :sillybleh:\nif you didn't get this by messing around with the slack api, please DM <@${process.env.OWNER_ID || "U08RJ1PEM7X"}> and provide the ID ${action.value}.` });
+      return;
+    }
+    if (entry.approval !== "Approved") {
+      await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id, text: `Your sticker request isn't able to be edited right now! If you still need to make changes, please message <@${process.env.OWNER_ID || "U08RJ1PEM7X"}>.` });
+      return;
+    }
+    await updateStatus(entry.recordID, "Confirmed");
+    await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id!, text: `Thanks! Your address and name have been confirmed, and your stickers will be mailed soon.\nIf you need to make any more changes, please message <@${process.env.OWNER_ID || "U08RJ1PEM7X"}>.` });
+  });
+  app.action("hcmc-edit", async ({ ack, action, body, client }) => {
+    ack();
+    if (action.type !== "button" || body.type !== "block_actions") return;
+    if (!action.value) {
+      app.logger.error(`Action ${body.actions[0]?.action_id} didn't pass a value (when it should have given an Airtable record ID)!`);
+      return;
+    }
+    const entry = await getEntry(action.value);
+    if (entry.slackID !== body.user.id) {
+      await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id!, text: `you aren't who this button is meant for! :sillybleh:\nif you didn't get this by messing around with the slack api, please DM <@${process.env.OWNER_ID || "U08RJ1PEM7X"}> and provide the ID ${action.value}.` });
+      return;
+    }
+    if (entry.approval !== "Approved") {
+      await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id, text: `Your sticker request isn't able to be edited right now! If you still need to make changes, please message <@${process.env.OWNER_ID || "U08RJ1PEM7X"}>.` });
+      return;
+    }
+
+  });
+  app.action("hcmc-cancel", async ({ ack, action, body, client }) => {
+    ack();
+    if (action.type !== "button" || body.type !== "block_actions") return;
+    if (!action.value) {
+      app.logger.error(`Action ${body.actions[0]?.action_id} didn't pass a value (when it should have given an Airtable record ID)!`);
+      return;
+    }
+    const entry = await getEntry(action.value);
+    if (entry.slackID !== body.user.id) {
+      await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id!, text: `you aren't who this button is meant for! :sillybleh:\nif you didn't get this by messing around with the slack api, please DM <@${process.env.OWNER_ID || "U08RJ1PEM7X"}> and provide the ID ${action.value}.` });
+      return;
+    }
+    if (entry.approval !== "Approved") {
+      await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id, text: `Your sticker request isn't able to be edited right now! If you still need to make changes, please message <@${process.env.OWNER_ID || "U08RJ1PEM7X"}>.` });
+      return;
+    }
+    await updateStatus(entry.recordID, "Cancelled");
+    await client.chat.postEphemeral({ channel: body.channel!.id!, user: body.user.id!, text: `Thanks! Your sticker request has been cancelled, and you won't be mailed stickers.\nIf this was done in error, please message <@${process.env.OWNER_ID || "U08RJ1PEM7X"}> to restore your request.` });
   });
 }
 start();

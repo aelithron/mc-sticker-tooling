@@ -14,6 +14,7 @@ export default async function loadTable(): Promise<Entry[]> {
           mcName: item.get("Minecraft username") as string,
           slackName: item.get("Slack Username") as string,
           createdAt: new Date(item.get("Created") as string),
+          approval: item.get("Approval") as string,
           address: {
             street: item.get("Street Address") as string,
             city: item.get("City") as string,
@@ -44,6 +45,7 @@ export async function getEntry(recordID: string): Promise<Entry> {
       mcName: item.get("Minecraft username") as string,
       slackName: item.get("Slack Username") as string,
       createdAt: new Date(item.get("Created") as string),
+      approval: item.get("Approval") as string,
       address: {
         street: item.get("Street Address") as string,
         city: item.get("City") as string,
@@ -86,13 +88,13 @@ export async function updateAddress(recordID: string, address: Address): Promise
     return false;
   }
 }
-export async function cancelStickers(recordID: string) {
+export async function updateStatus(recordID: string, status: "Confirmed" | "Cancelled") {
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
   try {
-    await table.update(recordID, { "Approval": "Cancelled" });
+    await table.update(recordID, { "Approval": status });
     return true;
   } catch (e) {
-    console.error(`Airtable Error - Couldn't cancel ${recordID}\n${e}`);
+    console.error(`Airtable Error - Couldn't change status for ${recordID} to ${status}\n${e}`);
     return false;
   }
 }

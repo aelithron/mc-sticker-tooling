@@ -3,6 +3,7 @@ export type Entry = {
   slackID: string,
   mcName: string,
   slackName: string,
+  approval: string,
   createdAt: Date,
   address: Address
 }
