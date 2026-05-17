@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { sendDMs } from "./dms.js";
 import { getEntry, setSentDMs, updateAddress, updateStatus } from "./airtable.js";
 import createForm from "./forms.js";
-import type { Address, AddressEdit } from "../bot.js";
+import type { AddressEdit } from "../bot.js";
 
 let app: App;
 async function start() {
@@ -37,7 +37,7 @@ async function start() {
     }
     const dms = await sendDMs(app);
     await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, markdown_text: `done!~ DMs sent to ${dms.sentTo.length} ${dms.sentTo.length !== 1 ? "people" : "person"}!${dms.errors ? "\nthere was at least one error, please check the bot console!" : ""}` });
-    //await setSentDMs(dms.sentTo);
+    await setSentDMs(dms.sentTo);
   });
   app.action("hcmc-confirm", async ({ ack, action, body, client }) => {
     ack();
