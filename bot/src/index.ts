@@ -1,6 +1,6 @@
 import { App } from "@slack/bolt";
 import dotenv from "dotenv";
-import loadTable, { setSentDMs } from "./airtable.js";
+import { sendDMs } from "./dms.js";
 
 let app: App;
 async function start() {
@@ -26,9 +26,15 @@ async function start() {
   app.logger.setName("hc-mc-stickers");
   const selfInfo = await app.client.auth.test();
   app.logger.info(`is ready as ${selfInfo.user} (${selfInfo.user_id}) :D`);
-  const table = await loadTable();
-  console.log("airtable list (testing if this works meow):");
-  for (const item of table) console.log(`${item.slackName} (${item.mcName}) - ${item.recordID}`);
+  app.command("/send-sticker-dms", async ({ command, ack, client }) => {
+    ack();
+    if (command.user_id !== (process.env.OWNER_ID || "U08RJ1PEM7X")) {
+      await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, markdown_text: `you're not <@${process.env.OWNER_ID || "U08RJ1PEM7X"}>, silly! :sillybleh:\n(are you another minecraft admin? send a message in the admin channel about this)` });
+      return;
+    }
+    const dms = await sendDMs(app);
+    await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, markdown_text: `done!~ DMs sent to ${dms.sentTo.length} ${dms.sentTo.length !== 1 ? "people" : "person"}!${dms.errors ? "\nthere was at least one error, please check the bot console!" : ""}` });
+  });
 }
 start();
 export function getApp() { return app; }
