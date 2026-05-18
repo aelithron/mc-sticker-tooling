@@ -7,8 +7,8 @@ export const auth = betterAuth({
       config: [
         {
           providerId: "hca",
-          clientId: "e489af8679cbb10e9259796e205c3f71",
-          clientSecret: "bebfec3f9a2801d84dec440fac5acb9495c5214942e742166ee9bcc3186bfd81",
+          clientId: process.env.HCA_CLIENT_ID!,
+          clientSecret: process.env.HCA_CLIENT_SECRET,
           discoveryUrl: "https://auth.hackclub.com/.well-known/openid-configuration",
           scopes: ["openid", "email", "profile"]
         },
