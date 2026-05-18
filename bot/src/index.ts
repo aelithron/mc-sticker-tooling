@@ -184,7 +184,7 @@ async function start() {
             elements: [
               { type: "text", text: "Address: " },
               { type: "text", text: "[redacted]", style: { code: true } },
-              { type: "text", text: `, ${address.city || entry.address.city}, ${address.state || entry.address.state}, ${entry.address.country}, ${address.zip || entry.address.zip}` }
+              { type: "text", text: `, ${address.city || entry.address.city}, ${address.state || entry.address.state}, ${address.country || entry.address.country}, ${address.zip || entry.address.zip}` }
             ]
           },
           { type: "rich_text_section", elements: [{ type: "text", text: `Name on envelope: ${address.name || (entry.address.name || entry.slackName)}` }] }
