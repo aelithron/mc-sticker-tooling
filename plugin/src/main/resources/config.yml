@@ -1,0 +1,13 @@
+# Sticker Server by Nova
+# Written for the Hack Club MC server
+# This exposes an API endpoint to check if people have an achievement.
+
+# API settings
+api:
+  # API key, please set one! You will need to send an authorization header with a value of "Bearer [key]".
+  key: "abc123"
+  ## The port the API will run on
+  port: 4500
+
+# Advancement key
+advkey: "hccore:diamonds"

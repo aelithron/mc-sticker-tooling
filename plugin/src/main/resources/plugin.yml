@@ -1,0 +1,11 @@
+name: StickerSRV
+description: $description
+prefix: StickerServer
+version: '${version}'
+
+main: com.hackclub.stickersrv.Main
+api-version: '1.21.11'
+load: POSTWORLD
+
+authors: [ Nova ]
+website: mc.hackclub.com
