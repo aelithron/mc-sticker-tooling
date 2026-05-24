@@ -1,7 +1,7 @@
 package com.hackclub.stickersrv;
 
 import com.fren_gor.ultimateAdvancementAPI.UltimateAdvancementAPI;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
@@ -27,7 +27,7 @@ public final class Main extends JavaPlugin {
                 return gson.toJson(Map.of("error", "unauthorized", "message", "You didn't provide an API key, or it is invalid."));
             }
             try {
-                Player player = (Player) getServer().getScheduler().callSyncMethod(this, () -> getServer().getOfflinePlayer(req.params("name")));
+                OfflinePlayer player = getServer().getScheduler().callSyncMethod(this, () -> getServer().getOfflinePlayer(req.params("name"))).get();
                 boolean hasAdv = Objects.requireNonNull(api.getAdvancement(Objects.requireNonNull(getConfig().getString("advkey")))).isGranted(player.getUniqueId());
                 return gson.toJson(Map.of("hasAdv", hasAdv));
             } catch (NullPointerException e) {
