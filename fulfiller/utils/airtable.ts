@@ -51,7 +51,7 @@ export async function getLetter(recordID: string): Promise<Letter> {
     throw new Error(`Airtable Error - Couldn't find record ${recordID}\n${e}`);
   }
 }
-export async function updateStatus(recordID: string, { status, fulfilled }: { status: "Approved" | "Confirmed" | "Flagged" | undefined, fulfilled: 0 | 1 | undefined }) {
+export async function updateStatus(recordID: string, { status, fulfilled }: { status: "Approved" | "Confirmed" | "Flagged" | undefined, fulfilled: boolean | undefined }) {
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
   try {
     await table.update(recordID, { "Approval": status, "Fulfilled": fulfilled });

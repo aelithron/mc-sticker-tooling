@@ -4,7 +4,7 @@ import { Config } from "@/utils/config";
 import { faCheck, faFlag, faUndo, faWarning } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { SwipeEventData, useSwipeable } from "react-swipeable";
+import { useSwipeable } from "react-swipeable";
 import * as z from "zod";
 
 export default function LetterUI() {
@@ -27,19 +27,56 @@ export default function LetterUI() {
       return;
     }
   }
-  async function handleFulfill(e: SwipeEventData) {
+  async function handleFulfill() {
+    try {
+      const res = await fetch(`/api/letter/${letter!.recordID}`, { method: "PATCH", body: JSON.stringify({ fulfilled: true }) });
+      const body = await res.json();
+      if (body.error) {
+        alert(`There was an error updating the letter: ${body.message} (${body.error})`);
+        return;
+      }
+    } catch (e) {
+      console.error(`Error updating the letter!\n${e}`);
+      alert("There was an error updating the letter, please check your console for more info.");
+      return;
+    }
     setLastLetter(letter);
     await nextLetter();
     setDisplayMsg("fulfilled");
     setTimeout(() => { setDisplayMsg(undefined) }, 3000);
   }
-  async function handleFlag(e: SwipeEventData) {
+  async function handleFlag() {
+    try {
+      const res = await fetch(`/api/letter/${letter!.recordID}`, { method: "PATCH", body: JSON.stringify({ status: "Flagged" }) });
+      const body = await res.json();
+      if (body.error) {
+        alert(`There was an error updating the letter: ${body.message} (${body.error})`);
+        return;
+      }
+    } catch (e) {
+      console.error(`Error updating the letter!\n${e}`);
+      alert("There was an error updating the letter, please check your console for more info.");
+      return;
+    }
     setLastLetter(letter);
     await nextLetter();
     setDisplayMsg("flagged");
     setTimeout(() => { setDisplayMsg(undefined) }, 3000);
   }
   async function undoLast() {
+    try {
+      const res = await fetch(`/api/letter/${lastLetter!.recordID}`, { method: "PATCH", body: JSON.stringify({ status: lastLetter!.approval, fulfilled: false }) });
+      const body = await res.json();
+      if (body.error) {
+        alert(`There was an error updating the letter: ${body.message} (${body.error})`);
+        return;
+      }
+      setLetter(body);
+    } catch (e) {
+      console.error(`Error updating the letter!\n${e}`);
+      alert("There was an error updating the letter, please check your console for more info.");
+      return;
+    }
     setLetter(lastLetter);
     setLastLetter(undefined);
     setDisplayMsg("undone");
@@ -76,7 +113,7 @@ export default function LetterUI() {
     }
     loadLetter();
   }, []);
-  const handlers = useSwipeable({ onSwipedRight: async (e) => await handleFulfill(e), onSwipedLeft: async (e) => await handleFlag(e), trackTouch: true, trackMouse: true });
+  const handlers = useSwipeable({ onSwipedRight: async () => await handleFulfill(), onSwipedLeft: async () => await handleFlag(), trackTouch: true, trackMouse: true });
   if (!letter || !config) return <div>Loading letters...</div>
   return (
     <div className="gap-2">
@@ -102,7 +139,7 @@ export default function LetterUI() {
           <p>{letter.address.city}, {letter.address.state} {letter.address.zip}</p>
           {letter.address.country !== "United States of America (US)" && <p>{letter.address.country.split("(")[0]}</p>}
         </div>
-        <div className="absolute top-4 right-4 w-12 h-16 bg-violet-300" />
+        <div className="absolute top-4 right-4 w-16 h-12 md:w-24 md:h-18 bg-violet-300 rounded-xs" />
       </div>
       <p className="absolute mt-30 text-sm text-slate-400">Record ID: {letter.recordID}</p>
     </div>
