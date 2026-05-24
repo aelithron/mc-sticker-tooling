@@ -9,3 +9,7 @@ load: POSTWORLD
 
 authors: [ Nova ]
 website: mc.hackclub.com
+
+depend:
+  - UltimateAdvancementAPI
+  - HCCore

@@ -8,6 +8,3 @@ api:
   key: "abc123"
   ## The port the API will run on
   port: 4500
-
-# Advancement key
-advkey: "hccore:diamonds"
