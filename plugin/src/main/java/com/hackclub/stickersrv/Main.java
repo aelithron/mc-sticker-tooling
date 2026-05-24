@@ -2,15 +2,16 @@ package com.hackclub.stickersrv;
 
 import com.fren_gor.ultimateAdvancementAPI.UltimateAdvancementAPI;
 import com.fren_gor.ultimateAdvancementAPI.advancement.Advancement;
+import com.fren_gor.ultimateAdvancementAPI.database.CacheFreeingOption;
 import com.fren_gor.ultimateAdvancementAPI.util.AdvancementKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import static spark.Spark.*;
 import com.google.gson.Gson;
@@ -25,12 +26,13 @@ public final class Main extends JavaPlugin {
         get("/check/:uuid", (req, res) -> {
             res.type("application/json");
             String auth = req.headers("Authorization");
-            if (!Objects.equals(auth.split("Bearer ")[1], getConfig().getString("api.key", "abc123"))) {
+            if (auth == null || !Objects.equals(auth.split("Bearer ")[1], getConfig().getString("api.key", "abc123"))) {
                 res.status(403);
                 return gson.toJson(Map.of("error", "unauthorized", "message", "You did not provide an API key, or it is invalid."));
             }
+            UUID uuid;
             try {
-                UUID.fromString(req.params("uuid"));
+                uuid = UUID.fromString(req.params("uuid"));
             } catch (IllegalArgumentException e) {
                 res.status(400);
                 return gson.toJson(Map.of("error", "uuid", "message", "The UUID you provided is not valid!"));
@@ -39,13 +41,24 @@ public final class Main extends JavaPlugin {
             assert hccore != null;
             UltimateAdvancementAPI api = UltimateAdvancementAPI.getInstance(hccore);
             try {
-                OfflinePlayer player = getServer().getScheduler().callSyncMethod(this, () -> getServer().getOfflinePlayer(UUID.fromString(req.params("uuid")))).get();
+                OfflinePlayer player = getServer().getScheduler().callSyncMethod(this, () -> getServer().getOfflinePlayer(uuid)).get();
+                if (!player.hasPlayedBefore()) {
+                    res.status(404);
+                    return gson.toJson(Map.of("error", "player", "message", "This player has not joined the server before!"));
+                }
                 Advancement adv = api.getAdvancement(new AdvancementKey("hack_club", "diamonds"));
                 assert adv != null;
-                api.loadOfflinePlayer(player.getUniqueId());
-                boolean hasAdv = adv.isGranted(player.getUniqueId());
-                api.unloadOfflinePlayer(player.getUniqueId());
-                return gson.toJson(Map.of("hasAdv", hasAdv));
+                CompletableFuture<Boolean> future = new CompletableFuture<>();
+                api.loadOfflinePlayer(player.getUniqueId(), CacheFreeingOption.AUTOMATIC(this, 5000), result -> {
+                    if (result.isSucceeded()) {
+                        assert result.getResult() != null;
+                        boolean hasAdv = adv.isGranted(result.getResult());
+                        future.complete(hasAdv);
+                    } else {
+                        future.completeExceptionally(result.getOccurredException());
+                    }
+                });
+                return gson.toJson(Map.of("hasAdv", future.get()));
             } catch (Exception e) {
                 res.status(500);
                 getLogger().log(Level.SEVERE, "Error occurred when looking up UUID " + req.params("uuid") + ":\n" + e);

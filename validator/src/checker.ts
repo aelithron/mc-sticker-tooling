@@ -24,8 +24,7 @@ export default async function check(entry: Entry, caches: { airtable: DedupeCach
           if ((mojangBody.errorMessage as string).includes("Couldn't find any profile with name")) {
             errors.push(`Minecraft username "${entry.mcName}" doesn't exist!`);
           } else throw new Error(`Error on Record ${entry.recordID} - Mojang API:\n${mojangBody.errorMessage}`);
-        }
-        uuid = (mojangBody.id as string).replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, "$1-$2-$3-$4-$5");
+        } else uuid = (mojangBody.id as string).replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, "$1-$2-$3-$4-$5");
         break;
       }
     } else {
@@ -38,8 +37,7 @@ export default async function check(entry: Entry, caches: { airtable: DedupeCach
         if ((geyserBody.message as string).includes("Unable to find user in our cache. Please try specifying their Floodgate UUID instead")) {
           errors.push(`Minecraft username "${entry.mcName}" (Bedrock) doesn't exist!`);
         } else throw new Error(`Error on Record ${entry.recordID} - Geyser API:\n${geyserBody.message}`);
-      }
-      uuid = BigInt(geyserBody.xuid as string).toString(16).toUpperCase().replace(/^(.{4})(.{12})$/, "00000000-0000-0000-$1-$2");
+      } else uuid = BigInt(geyserBody.xuid as string).toString(16).toUpperCase().replace(/^(.{4})(.{12})$/, "00000000-0000-0000-$1-$2");
     }
   } else errors.push("This record is missing a Minecraft username!");
   if (uuid && entry.createdAt.getTime() > 1762744410) { // nov 9 2025 was the new server's launch date, so i don't have data before it
