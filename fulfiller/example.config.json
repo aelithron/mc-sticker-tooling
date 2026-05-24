@@ -1,0 +1,12 @@
+{
+  "approvedUsers": [],
+  "returnAddress": {
+    "name": "",
+    "street": "",
+    "city": "",
+    "state": "",
+    "zip": "",
+    "country": ""
+  },
+  "confirmedOnly": true
+}
