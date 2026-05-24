@@ -1,6 +1,7 @@
 plugins {
     id("java-library")
     id("xyz.jpenilla.run-paper") version "3.0.2"
+    id("com.gradleup.shadow") version "9.4.1"
 }
 
 repositories {
@@ -12,7 +13,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("com.frengor:ultimateadvancementapi:2.2.3")
-    compileOnly("com.sparkjava:spark-core:2.9.4")
+    implementation("com.sparkjava:spark-core:2.9.4")
     implementation("com.google.code.gson:gson:2.14.0")
 }
 
