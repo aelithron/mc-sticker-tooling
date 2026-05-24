@@ -55,6 +55,7 @@ export async function enterVerdict(recordID: string, verdict: Verdict) {
     console.log(`${recordID} - Approved`);
   } else {
     console.log(`${recordID} - Flagged (${verdict.errors.length} Error${verdict.errors.length !== 1 ? "s" : ""})`);
+    for (const error of verdict.errors) console.log(`- ${error}`);
   }
   /*
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");

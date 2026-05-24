@@ -40,13 +40,17 @@ export default async function check(entry: Entry, caches: { airtable: DedupeCach
       } else uuid = BigInt(geyserBody.xuid as string).toString(16).toUpperCase().replace(/^(.{4})(.{12})$/, "00000000-0000-0000-$1-$2");
     }
   } else errors.push("This record is missing a Minecraft username!");
-  if (uuid && entry.createdAt.getTime() > 1762744410) { // nov 9 2025 was the new server's launch date, so i don't have data before it
+  if (uuid && entry.createdAt.getTime() > 1762725942000) { // nov 9 2025 was the new server's launch date, so i don't have data before it
     let stickerAPI;
     try {
       stickerAPI = await fetch(`${process.env.STICKERSRV_URL!}/check/${uuid}`, { headers: { "Authorization": `Bearer ${process.env.STICKERSRV_KEY}` } });
     } catch (e) { throw new Error(`Error on Record ${entry.recordID} - Sticker Server API:\n${e}`); }
     const stickerBody = await stickerAPI.json();
-    if (!stickerAPI.ok || stickerBody.error) throw new Error(`Error on Record ${entry.recordID} - Sticker Server API:\n${stickerBody.message} (${stickerBody.error})`);
+    if (!stickerAPI.ok || stickerBody.error) {
+      if (stickerBody.error === "player") {
+        errors.push("This account hasn't played on the Hack Club MC server!");
+      } else throw new Error(`Error on Record ${entry.recordID} - Sticker Server API:\n${stickerBody.message} (${stickerBody.error})`);
+    }
     if (stickerBody.hasAdv === false) errors.push("This account hasn't found diamonds on the Hack Club MC server!");
   }
   let slackAPI;
