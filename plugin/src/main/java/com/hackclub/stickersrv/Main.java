@@ -19,9 +19,6 @@ public final class Main extends JavaPlugin {
     private Gson gson = new Gson();
     @Override
     public void onEnable() {
-        Plugin hccore = getServer().getPluginManager().getPlugin("HCCore");
-        assert hccore != null;
-        UltimateAdvancementAPI api = UltimateAdvancementAPI.getInstance(hccore);
         getConfig().options().copyDefaults();
         saveDefaultConfig();
         port(getConfig().getInt("api.port", 4500));
@@ -38,11 +35,16 @@ public final class Main extends JavaPlugin {
                 res.status(400);
                 return gson.toJson(Map.of("error", "uuid", "message", "The UUID you provided is not valid!"));
             }
+            Plugin hccore = getServer().getScheduler().callSyncMethod(this, () -> getServer().getPluginManager().getPlugin("HCCore")).get();
+            assert hccore != null;
+            UltimateAdvancementAPI api = UltimateAdvancementAPI.getInstance(hccore);
             try {
                 OfflinePlayer player = getServer().getScheduler().callSyncMethod(this, () -> getServer().getOfflinePlayer(UUID.fromString(req.params("uuid")))).get();
-                Advancement adv = api.getAdvancement(new AdvancementKey(hccore, "diamonds"));
+                Advancement adv = api.getAdvancement(new AdvancementKey("hack_club", "diamonds"));
                 assert adv != null;
+                api.loadOfflinePlayer(player.getUniqueId());
                 boolean hasAdv = adv.isGranted(player.getUniqueId());
+                api.unloadOfflinePlayer(player.getUniqueId());
                 return gson.toJson(Map.of("hasAdv", hasAdv));
             } catch (Exception e) {
                 res.status(500);
