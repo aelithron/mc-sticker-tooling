@@ -148,7 +148,7 @@ async function start() {
       city: view.state.values.city!.city_input!.value || undefined,
       state: view.state.values.state!.state_input!.value || undefined,
       zip: view.state.values.zip!.zip_input!.value || undefined,
-      country: view.state.values.country!.country_input!.selected_option!.value || undefined,
+      country: (view.state.values.country!.country_input!.selected_option !== null ? view.state.values.country!.country_input!.selected_option!.value : undefined),
       name: view.state.values.name!.name_input!.value || undefined
     }
     await updateAddress(entry.recordID, address);
