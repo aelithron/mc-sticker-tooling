@@ -61,7 +61,7 @@ export async function enterVerdict(recordID: string, verdict: Verdict) {
   table.update(recordID, { "Approval": (verdict.approved ? "Approved" : "Flagged") });
   if (!verdict.approved) {
     try {
-      await fetch(`https://airtable.com/${process.env.AIRTABLE_BASE_ID}/${process.env.AIRTABLE_TABLE_ID}/${recordID}/comments`, { method: "POST", headers: { "Authorization": `Bearer ${process.env.AIRTABLE_API_KEY}` }, body: JSON.stringify({ text: `[script] Errors:\n${verdict.errors.join("\n")}` }) });
+      const res = await fetch(`https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/${process.env.AIRTABLE_TABLE_ID}/${recordID}/comments`, { method: "POST", headers: { "Authorization": `Bearer ${process.env.AIRTABLE_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ text: `[script] Errors:\n${verdict.errors.join("\n")}` }) });
     } catch (e) {
       throw new Error(`Error on Record ${recordID} - Airtable API:\n${e}`);
     }
