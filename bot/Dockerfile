@@ -11,7 +11,6 @@ COPY pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile && pnpm add -g typescript
 COPY src/ ./src/
 COPY tsconfig.json ./
-COPY example.config.json ./
 RUN pnpm run build
 
 EXPOSE 3000
