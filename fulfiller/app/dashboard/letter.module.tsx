@@ -12,6 +12,7 @@ export default function LetterUI() {
   const [config, setConfig] = useState<z.output<typeof Config> | undefined>();
   const [lastLetter, setLastLetter] = useState<Letter | undefined>();
   const [displayMsg, setDisplayMsg] = useState<"fulfilled" | "flagged" | "undone" | undefined>();
+  const [international, setInternational] = useState<boolean>(false);
   async function nextLetter() {
     try {
       const res = await fetch("/api/letter");
@@ -21,6 +22,7 @@ export default function LetterUI() {
         return;
       }
       setLetter(body);
+      setInternational(body.address.country !== "United States of America (US)");
     } catch (e) {
       console.error(`Error loading a letter!\n${e}`);
       alert("There was an error loading a letter, please check your console for more info.");
@@ -78,6 +80,7 @@ export default function LetterUI() {
       return;
     }
     setLetter(lastLetter);
+    setInternational(lastLetter!.address.country !== "United States of America (US)");
     setLastLetter(undefined);
     setDisplayMsg("undone");
     setTimeout(() => { setDisplayMsg(undefined) }, 3000);
@@ -105,6 +108,7 @@ export default function LetterUI() {
           return;
         }
         setLetter(body);
+        setInternational(body.address.country !== "United States of America (US)");
       } catch (e) {
         console.error(`Error loading a letter!\n${e}`);
         alert("There was an error loading a letter, please check your console for more info.");
@@ -129,15 +133,16 @@ export default function LetterUI() {
       <div {...handlers} className="touch-pan-y bg-slate-100 p-8 shadow-2xl w-80 h-48 md:w-160 md:h-96 relative overflow-hidden">
         <div className="absolute top-4 left-4 text-sm md:text-lg">
           <p>{config.returnAddress.name}</p>
-          <p>{config.returnAddress.street}</p>
-          <p>{config.returnAddress.city}, {config.returnAddress.state} {config.returnAddress.zip}</p>
-          {letter.address.country !== "United States of America (US)" && <p>{config.returnAddress.country}</p>}
+          <p>{international ? config.returnAddress.street.toUpperCase() : config.returnAddress.street}</p>
+          <p>{international ? config.returnAddress.city.toUpperCase() : config.returnAddress.city}, {international ? config.returnAddress.state.toUpperCase() : config.returnAddress.state} {config.returnAddress.zip.toUpperCase()}</p>
+          {international && <p>{config.returnAddress.country.toUpperCase()}</p>}
         </div>
-        <div className="absolute top-1/2 left-1/3 m-auto text-sm md:text-lg">
+        {international && <p className="text-lg absolute bottom-4 left-4">AIRMAIL / PAR AVION</p>}
+        <div className="absolute top-2/5 left-1/3 m-auto text-sm md:text-lg">
           <p>{letter.address.name}</p>
-          <p>{letter.address.street}</p>
-          <p>{letter.address.city}, {letter.address.state} {letter.address.zip}</p>
-          {letter.address.country !== "United States of America (US)" && <p>{letter.address.country.split("(")[0]}</p>}
+          <p>{international ? letter.address.street.toUpperCase() : letter.address.street}</p>
+          <p>{international ? letter.address.city.toUpperCase() : letter.address.city}, {international ? letter.address.state.toUpperCase() : letter.address.state} {letter.address.zip}</p>
+          {international && <p>{letter.address.country.split("(")[0].toUpperCase()}</p>}
         </div>
         <div className="absolute top-4 right-4 w-16 h-12 md:w-24 md:h-18 bg-violet-300 rounded-xs" />
       </div>
