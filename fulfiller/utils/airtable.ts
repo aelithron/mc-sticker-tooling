@@ -3,7 +3,7 @@ import Airtable from "airtable";
 
 export default async function loadTable(): Promise<Letter[]> {
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
-  const res = table.select({ filterByFormula: "AND(OR({Approval}='Approved', {Approval}='Confirmed'), {Fulfilled} = 0, {Pre-drafted (temp)} = 0)" });
+  const res = table.select({ filterByFormula: "AND(OR({Approval}='Approved', {Approval}='Confirmed'), {Fulfilled} = 0)" });
   const entries: Letter[] = [];
   return new Promise((resolve, reject) => {
     res.eachPage((records, fetchNextPage) => {
@@ -54,7 +54,7 @@ export async function getLetter(recordID: string): Promise<Letter> {
 export async function updateStatus(recordID: string, { status, fulfilled }: { status: "Approved" | "Confirmed" | "Flagged" | undefined, fulfilled: boolean | undefined }) {
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
   try {
-    await table.update(recordID, { "Approval": status, "Pre-drafted (temp)": fulfilled });
+    await table.update(recordID, { "Approval": status, "Fulfilled": fulfilled });
     return true;
   } catch (e) {
     console.error(`Airtable Error - Couldn't change status for ${recordID} to ${status}\n${e}`);
