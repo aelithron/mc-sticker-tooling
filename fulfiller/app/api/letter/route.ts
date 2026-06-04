@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   const queue = await loadTable();
   const confirmedQueue = queue.filter((letter) => (letter.approval === "Confirmed"));
   const unconfirmedQueue = queue.filter((letter) => (letter.approval === "Approved"));
-  if (confirmedQueue.length >= 1) return NextResponse.json(confirmedQueue[0]);
-  if (unconfirmedQueue.length >= 1 && !config.confirmedOnly) return NextResponse.json(unconfirmedQueue[0]);
+  if (confirmedQueue.length >= 1) return NextResponse.json(confirmedQueue[Math.floor(Math.random() * confirmedQueue.length)]);
+  if (unconfirmedQueue.length >= 1 && !config.confirmedOnly) return NextResponse.json(unconfirmedQueue[Math.floor(Math.random() * unconfirmedQueue.length)]);
   return NextResponse.json({ error: "empty", message: "The fulfillment queue is empty!" });
 }
