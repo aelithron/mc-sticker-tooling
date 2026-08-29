@@ -1,6 +1,6 @@
 export type Letter = {
   recordID: string;
-  approval: "Approved" | "Confirmed" | "Flagged";
+  approval: "Approved" | "Confirmed" | "Flagged" | "Pending";
   address: {
     street: string;
     city: string;

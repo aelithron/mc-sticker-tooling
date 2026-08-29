@@ -121,13 +121,13 @@ export default function LetterUI() {
   const handlers = useSwipeable({ onSwipedRight: async () => await handleFulfill(), onSwipedLeft: async () => await handleFlag(), trackTouch: true, trackMouse: true });
   if (!letter || !config) return <div>Loading letters...</div>
   return (
-    <div className="gap-2">
-      <div className={`${displayMsg ? "py-4" : "py-7"} mx-2 rounded-xl text-center ${displayMsg === "fulfilled" ? "bg-emerald-400" : ""} ${displayMsg === "flagged" ? "bg-orange-400" : ""} ${displayMsg === "undone" ? "bg-slate-400" : ""}`}>
+    <div className="flex flex-col gap-2 justify-center items-center">
+      <div className={`${displayMsg ? "py-4" : "py-7"} mx-2 rounded-xl text-center ${displayMsg === "fulfilled" ? "bg-emerald-400" : ""} ${displayMsg === "flagged" ? "bg-orange-400" : ""} ${displayMsg === "undone" ? "bg-slate-400" : ""} w-2/3`}>
         {displayMsg === "fulfilled" && <p><FontAwesomeIcon icon={faCheck} /> Fulfilled!</p>}
         {displayMsg === "flagged" && <p><FontAwesomeIcon icon={faFlag} /> Flagged for manual review!</p>}
         {displayMsg === "undone" && <p><FontAwesomeIcon icon={faUndo} /> Undid the last letter!</p>}
       </div>
-      <div className="flex gap-2 justify-between bg-violet-300/70 p-2 mx-2 my-4 rounded-xl">
+      <div className="flex gap-2 justify-between bg-violet-300/70 p-2 mx-2 my-4 rounded-xl w-2/3">
         <button onClick={async () => await undoLast()} disabled={lastLetter === undefined} className={`${lastLetter !== undefined ? "hover:text-sky-500" : "text-slate-400"}`}><FontAwesomeIcon icon={faUndo} /> undo last</button>
         {letter.approval === "Confirmed" ? <p className="text-emerald-500"><FontAwesomeIcon icon={faCheck} /> Confirmed</p> : <p className="text-orange-500"><FontAwesomeIcon icon={faWarning} /> {letter.approval}</p>}
       </div>
@@ -147,7 +147,7 @@ export default function LetterUI() {
         </div>
         <div className="absolute top-4 right-4 w-16 h-12 md:w-24 md:h-18 bg-violet-300 rounded-xs" />
       </div>
-      <p className="absolute mt-30 text-sm text-slate-400">Record ID: {letter.recordID}</p>
+      <p className="mt-4 text-sm text-slate-400">Record ID: {letter.recordID}</p>
     </div>
   );
 }

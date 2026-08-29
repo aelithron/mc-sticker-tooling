@@ -1,16 +1,23 @@
 import { Letter } from "@/fulfiller";
 import Airtable from "airtable";
 
-export default async function loadTable(): Promise<Letter[]> {
+export default async function loadTable(mode: "letter" | "validator"): Promise<Letter[]> {
+  let formula;
+  if (mode === "letter") {
+    formula = "AND(OR({Approval}='Approved', {Approval}='Confirmed'), {Fulfilled} = 0)";
+  }
+  if (mode === "validator") {
+    formula = "AND(OR({Approval}='Pending', {Approval}='Flagged'), {Fulfilled} = 0)";
+  }
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
-  const res = table.select({ filterByFormula: "AND(OR({Approval}='Approved', {Approval}='Confirmed'), {Fulfilled} = 0)" });
+  const res = table.select({ filterByFormula: formula });
   const entries: Letter[] = [];
   return new Promise((resolve, reject) => {
     res.eachPage((records, fetchNextPage) => {
       for (const item of records) {
         entries.push({
           recordID: item.id,
-          approval: item.get("Approval") as "Approved" | "Confirmed",
+          approval: item.get("Approval") as "Approved" | "Confirmed" | "Pending" | "Flagged",
           address: {
             street: item.get("Street Address") as string,
             city: item.get("City") as string,
@@ -37,7 +44,7 @@ export async function getLetter(recordID: string): Promise<Letter> {
     const item = await table.find(recordID);
     return {
       recordID: item.id,
-      approval: item.get("Approval") as "Approved" | "Confirmed",
+      approval: item.get("Approval") as "Approved" | "Confirmed" | "Pending" | "Flagged",
       address: {
         street: item.get("Street Address") as string,
         city: item.get("City") as string,
@@ -51,7 +58,7 @@ export async function getLetter(recordID: string): Promise<Letter> {
     throw new Error(`Airtable Error - Couldn't find record ${recordID}\n${e}`);
   }
 }
-export async function updateStatus(recordID: string, { status, fulfilled }: { status: "Approved" | "Confirmed" | "Flagged" | undefined, fulfilled: boolean | undefined }) {
+export async function updateStatus(recordID: string, { status, fulfilled }: { status: "Approved" | "Confirmed" | "Pending" | "Flagged" | undefined, fulfilled: boolean | undefined }) {
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
   try {
     await table.update(recordID, { "Approval": status, "Fulfilled": fulfilled });
