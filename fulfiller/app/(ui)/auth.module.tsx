@@ -36,7 +36,7 @@ export default function AuthButton() {
     return (
       <div className="flex flex-col gap-4 mt-2 items-center">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link href={"/sender"} className="flex flex-col bg-violet-300 p-2 rounded-lg">
+          <Link href={"/validator"} className="flex flex-col bg-violet-300 p-2 rounded-lg">
             <h2 className="hover:text-sky-500 text-lg font-semibold"><FontAwesomeIcon icon={faCheck} /> <u>Validator</u></h2>
             <p>Shows pending requests that need to be checked first!</p>
           </Link>
