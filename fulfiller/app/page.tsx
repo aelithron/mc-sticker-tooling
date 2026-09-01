@@ -1,6 +1,6 @@
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import AuthButton from "./(ui)/auth.module";
+import MainView from "./main.module";
 
 export default function Home() {
   return (
@@ -8,7 +8,7 @@ export default function Home() {
       <div className="flex flex-col items-center">
         <h1 className="font-semibold text-3xl"><FontAwesomeIcon icon={faStar} /> HC MC Sticker Fulfiller</h1>
         <p>Tool for sending out stickers for Hack Club MC! :3</p>
-        <AuthButton />
+        <MainView />
       </div>
     </div>
   );

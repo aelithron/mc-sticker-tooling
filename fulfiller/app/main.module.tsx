@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-export default function AuthButton() {
+export default function MainView() {
   const [authorized, setAuthorized] = useState<boolean>(true);
   const session = authClient.useSession();
   useEffect(() => {

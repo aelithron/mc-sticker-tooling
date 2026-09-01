@@ -25,7 +25,10 @@ export default async function loadTable(mode: "letter" | "validator"): Promise<L
             country: item.get("Country") as string,
             zip: item.get("Zip Code") as string,
             name: (item.get("Mailing Name") !== undefined ? item.get("Mailing Name") as string : item.get("Slack Username") as string)
-          }
+          },
+          slackID: item.get("Slack ID") as string,
+          mcName: item.get("Minecraft username") as string,
+          createdAt: new Date(item.get("Created") as string)
         });
       }
       fetchNextPage();
@@ -52,7 +55,10 @@ export async function getLetter(recordID: string): Promise<Letter> {
         country: item.get("Country") as string,
         zip: item.get("Zip Code") as string,
         name: (item.get("Mailing Name") !== undefined ? item.get("Mailing Name") as string : item.get("Slack Username") as string)
-      }
+      },
+      slackID: item.get("Slack ID") as string,
+      mcName: item.get("Minecraft username") as string,
+      createdAt: new Date(item.get("Created") as string)
     }
   } catch (e) {
     throw new Error(`Airtable Error - Couldn't find record ${recordID}\n${e}`);
