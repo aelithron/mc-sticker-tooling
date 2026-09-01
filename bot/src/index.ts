@@ -29,7 +29,7 @@ async function start() {
   app.logger.setName("hc-mc-stickers");
   const selfInfo = await app.client.auth.test();
   app.logger.info(`is ready as ${selfInfo.user} (${selfInfo.user_id}) :D`);
-  app.command("/send-sticker-dms", async ({ command, ack, client }) => {
+  app.command((process.env.SLACK_CMD || "/send-sticker-dms"), async ({ command, ack, client }) => {
     ack();
     if (command.user_id !== (process.env.OWNER_ID || "U08RJ1PEM7X")) {
       await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, markdown_text: `you're not <@${process.env.OWNER_ID || "U08RJ1PEM7X"}>, silly! :sillybleh:\n(are you another minecraft admin? send a message in the admin channel about this)` });

@@ -1,0 +1,46 @@
+{
+    "display_information": {
+        "name": "(DEMO) Minecraft Stickers",
+        "description": "handling fulfillment for #minecraft free stickers!",
+        "background_color": "#1d7c00",
+        "long_description": "i'm a bot to help you get your free stickers for finding diamonds on the hack club minecraft server (#minecraft)!\r\n\r\n[written by @Ghost of Nova - code at https://github.com/aelithron/mc-sticker-tooling]"
+    },
+    "features": {
+        "bot_user": {
+            "display_name": "(DEMO) Minecraft Stickers",
+            "always_online": false
+        },
+        "slash_commands": [
+            {
+                "command": "/demo-send-sticker-dms",
+                "description": "(DEMO) Sends DMs for MC stickers",
+                "should_escape": true
+            }
+        ]
+    },
+    "oauth_config": {
+        "scopes": {
+            "bot": [
+                "chat:write.public",
+                "chat:write",
+                "chat:write.customize",
+                "commands",
+                "im:history",
+                "im:read",
+                "im:write",
+                "users:read",
+                "users:read.email"
+            ]
+        },
+        "pkce_enabled": false
+    },
+    "settings": {
+        "interactivity": {
+            "is_enabled": true
+        },
+        "org_deploy_enabled": false,
+        "socket_mode_enabled": true,
+        "token_rotation_enabled": false,
+        "is_mcp_enabled": false
+    }
+}

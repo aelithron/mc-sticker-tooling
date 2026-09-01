@@ -19,12 +19,12 @@ export function OverrideStatus({ id }: { id: string }) {
         alert(`There was an error updating the letter: ${body.message} (${body.error})`);
         return;
       }
+      window.location.reload();
     } catch (e) {
       console.error(`Error updating the letter!\n${e}`);
       alert("There was an error updating the letter, please check your console for more info.");
       return;
     }
-    window.location.reload();
   }
   return (
     <form className="flex gap-2" onSubmit={handleSubmit}>
@@ -38,3 +38,11 @@ export function OverrideStatus({ id }: { id: string }) {
     </form>
   )
 }
+/*
+export function ValidateLetter({ id }: { id: string }) {
+  async function handleValidate() {
+
+  }
+  return <button></button>
+}
+*/
