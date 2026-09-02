@@ -1,0 +1,278 @@
+name: Build/Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  panel-release:
+    name: Build/Release Panel
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    defaults:
+      run:
+        working-directory: "./panel"
+    steps:
+      - uses: actions/checkout@v6
+      - name: Get Version
+        run: echo "VERSION=${GITHUB_REF_NAME#server/}" >> $GITHUB_ENV
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 11
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "pnpm"
+          cache-dependency-path: "server/pnpm-lock.yaml"
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+      - run: pnpm install --frozen-lockfile
+      - name: Lint / Type-check
+        run: |
+          pnpm lint
+          pnpm check-types
+      - name: Bundle (shared)
+        run: |
+          mkdir -p dist/shared/
+          mkdir release/
+          pnpm build
+          cp dist/index.js dist/shared/index.js
+          cp extras/folderharbor.service dist/shared/folderharbor.service
+          cp extras/folderharbor-server dist/shared/folderharbor-server
+          cp -r drizzle/ dist/shared/drizzle/
+          cp -r patches/ dist/shared/patches/
+          cp example.config.json dist/shared/example.config.json
+          cp pnpm-workspace.yaml dist/shared/pnpm-workspace.yaml
+          cp pnpm-lock.yaml dist/shared/pnpm-lock.yaml
+          cp package.json dist/shared/package.json
+      - name: Bundle (x86_64)
+        env:
+          VERSION: ${{ env.VERSION }}
+        run: |
+          mkdir -p dist/x86_64/
+          cp -r dist/shared/. dist/x86_64/
+          cd dist/x86_64/
+          pnpm install --prod --frozen-lockfile
+          tar -czvf ../../release/folderharbor-server-${{ env.VERSION }}-linux-x86_64.tar.gz index.js example.config.json folderharbor.service folderharbor-server node_modules/ drizzle/
+      - name: Bundle (ARM64)
+        env:
+          VERSION: ${{ env.VERSION }}
+        run: |
+          mkdir -p dist/arm64/
+          cp -r dist/shared/. dist/arm64/
+          cd dist/arm64/
+          docker run --rm --platform linux/arm64 -v $(pwd):/work -w /work node:24-slim sh -c "npm i -g pnpm && pnpm install --prod --frozen-lockfile"
+          tar -czvf ../../release/folderharbor-server-${{ env.VERSION }}-linux-arm64.tar.gz index.js example.config.json folderharbor.service folderharbor-server node_modules/ drizzle/
+      - name: Attest Builds
+        uses: actions/attest@v4
+        with:
+          subject-path: 'server/release/*'
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        env:
+          VERSION: ${{ env.VERSION }}
+        with:
+          name: "Server ${{ env.VERSION }}"
+          make_latest: true
+          files: "server/release/**"
+          body: |
+            This is the FolderHarbor Server, the core that includes everything but the client!
+            Need a client for your server instance? Check out:
+            - [FolderHarbor Web](https://fh.novatea.dev/web)
+            - [FolderHarbor CLI](https://fh.novatea.dev/cli)
+  cli-release:
+    name: Release CLI
+    if: startsWith(github.ref, 'refs/tags/cli/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    defaults:
+      run:
+        working-directory: "./cli"
+    steps:
+      - uses: actions/checkout@v6
+      - name: Get Version
+        run: echo "VERSION=${GITHUB_REF_NAME#cli/v}" >> $GITHUB_ENV
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: "cli/go.mod"
+          cache: true
+          cache-dependency-path: "cli/go.sum"
+      - run: go mod download
+      - name: Vet
+        run: go vet ./...
+      - name: Build
+        env:
+          VERSION: ${{ env.VERSION }}
+        run: |
+          mkdir dist
+          GOOS=linux GOARCH=amd64 go build -o dist/folderharbor-cli-v${{ env.VERSION }}-linux-amd64 .
+          GOOS=linux GOARCH=arm64 go build -o dist/folderharbor-cli-v${{ env.VERSION }}-linux-arm64 .
+          GOOS=darwin GOARCH=amd64 go build -o dist/folderharbor-cli-v${{ env.VERSION }}-macos-amd64 .
+          GOOS=darwin GOARCH=arm64 go build -o dist/folderharbor-cli-v${{ env.VERSION }}-macos-arm64 .
+          GOOS=windows GOARCH=amd64 go build -o dist/folderharbor-cli-v${{ env.VERSION }}-windows-amd64.exe .
+      - name: Package Linux
+        env:
+          VERSION: ${{ env.VERSION }}
+        run: |
+          go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+          GOARCH=amd64 envsubst < nfpm.yml > nfpm-amd64.yml
+          GOARCH=arm64 envsubst < nfpm.yml > nfpm-arm64.yml
+          GOARCH=amd64 nfpm package --packager deb --config ./nfpm-amd64.yml --target ./dist/
+          GOARCH=amd64 nfpm package --packager rpm --config ./nfpm-amd64.yml --target ./dist/
+          GOARCH=arm64 nfpm package --packager deb --config ./nfpm-arm64.yml --target ./dist/
+          GOARCH=arm64 nfpm package --packager rpm --config ./nfpm-arm64.yml --target ./dist/
+      - name: Attest Builds
+        uses: actions/attest@v4
+        with:
+          subject-path: 'cli/dist/*'
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        env:
+          VERSION: ${{ env.VERSION }}
+        with:
+          name: "CLI v${{ env.VERSION }}"
+          files: "cli/dist/**"
+          make_latest: false
+          body: |
+            This is the FolderHarbor CLI, used for server administration and access.
+            **You need a running [FolderHarbor Server](https://fh.novatea.dev/server) to use this!**
+  web-release:
+    name: Release Web Panel
+    if: startsWith(github.ref, 'refs/tags/web/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
+    defaults:
+      run:
+        working-directory: "./web"
+    steps:
+      - uses: actions/checkout@v6
+      - name: Get Version
+        run: echo "VERSION=${GITHUB_REF_NAME#web/}" >> $GITHUB_ENV
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 11
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "pnpm"
+          cache-dependency-path: "web/pnpm-lock.yaml"
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          cache-binary: true
+      - name: Set up GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v7
+        env:
+          VERSION: ${{ env.VERSION }}
+        with:
+          context: ./web
+          push: true
+          sbom: true
+          provenance: mode=max
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/${{ github.repository }}/web:latest
+            ghcr.io/${{ github.repository }}/web:${{ env.VERSION }}
+          build-args: |
+            IMAGE_TAG=${{ env.VERSION }}
+      - name: Attest
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/${{ github.repository }}/web
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        env:
+          VERSION: ${{ env.VERSION }}
+        with:
+          name: "Web Panel ${{ env.VERSION }}"
+          make_latest: false
+          body: |
+            This is the FolderHarbor web panel, used for server administration and access.
+            This is released as a [Docker image](https://github.com/users/aelithron/packages/container/package/folderharbor%2Fweb), so you should get it from there.
+            **You need a running [FolderHarbor Server](https://fh.novatea.dev/server) to use this!**
+  landing-release:
+    name: Release Landing Page
+    if: startsWith(github.ref, 'refs/tags/landing/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
+    defaults:
+      run:
+        working-directory: "./landing"
+    steps:
+      - uses: actions/checkout@v6
+      - name: Get Version
+        run: echo "VERSION=${GITHUB_REF_NAME#landing/}" >> $GITHUB_ENV
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 11
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "pnpm"
+          cache-dependency-path: "landing/pnpm-lock.yaml"
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          cache-binary: true
+      - name: Set up GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v7
+        env:
+          VERSION: ${{ env.VERSION }}
+        with:
+          context: ./landing
+          push: true
+          sbom: true
+          provenance: mode=max
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/${{ github.repository }}/landing:latest
+            ghcr.io/${{ github.repository }}/landing:${{ env.VERSION }}
+      - name: Attest
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/${{ github.repository }}/landing
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
