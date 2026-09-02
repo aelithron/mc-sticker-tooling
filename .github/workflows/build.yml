@@ -166,6 +166,10 @@ jobs:
   release-all:
     name: Release
     runs-on: ubuntu-latest
+    needs:
+      - panel-build
+      - bot-build
+      - plugin-build
     permissions:
       contents: write
       packages: write
@@ -187,11 +191,17 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         with:
-          name: "Server ${{ env.VERSION }}"
+          name: "${{ env.VERSION }}"
           make_latest: true
-          files: "server/release/**"
+          files: "dist/**"
           body: |
-            This is the FolderHarbor Server, the core that includes everything but the client!
-            Need a client for your server instance? Check out:
-            - [FolderHarbor Web](https://fh.novatea.dev/web)
-            - [FolderHarbor CLI](https://fh.novatea.dev/cli)
+            This is ${{ env.VERSION }} of Nova's free sticker fulfillment tooling, made for the Hack Club Minecraft server!
+            Here, you can download the following:
+            - StickerSRV: A Minecraft plugin that works with the validator to check if players have found diamonds (a prerequisite for claiming stickers).
+            - [legacy] Validator: A CLI tool that runs the validation system on all pending requests. This is also built into the web panel now, so you don't *need* this, but it does still work!
+
+            If you want the other two parts of the pipeline (the panel and bot), you need to get the Dockerfiles. These are:
+            - Web Panel: `ghcr.io/${{ github.repository }}/panel:${{ env.VERSION }}`
+            - Bot: `ghcr.io/${{ github.repository }}/bot:${{ env.VERSION }}`
+
+            You can read [the README](https://github.com/aelithron/mc-sticker-tooling/blob/main/README.md) to learn how to install and use all of these pieces! :3
