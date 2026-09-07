@@ -1,7 +1,7 @@
 import loadTable from "@/utils/airtable";
 import { auth } from "@/utils/auth";
 import loadConfig from "@/utils/config";
-import { faCheck, faDatabase, faEnvelope, faFlag, faHome, faMessage } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faCheck, faDatabase, faEnvelope, faFlag, faHome, faMessage } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Metadata } from "next";
 import { headers } from "next/headers";
@@ -28,6 +28,7 @@ export default async function Page() {
   const flagged = table.filter((letter) => (letter.approval === "Flagged")).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   return (
     <main className="flex flex-col min-h-screen p-8 md:p-20 gap-2">
+      <Link href={"/"} className="bg-violet-300 p-1 rounded-xl w-min hover:text-sky-500"><FontAwesomeIcon icon={faArrowLeft} /></Link>
       <h1 className="font-semibold text-3xl mb-4"><FontAwesomeIcon icon={faCheck} /> Validator</h1>
       <h1 className="text-2xl font-semibold"><FontAwesomeIcon icon={faEnvelope} /> Pending Requests</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -43,9 +44,9 @@ export default async function Page() {
   );
 }
 
-function ValidatorCard({ letter, key }: { letter: Letter, key: string }) {
+function ValidatorCard({ letter }: { letter: Letter }) {
   return (
-    <div key={key} className="flex flex-col p-2 bg-violet-300 rounded-lg">
+    <div key={letter.recordID} className="flex flex-col p-2 bg-violet-300 rounded-lg">
       <h2 className="font-semibold">{letter.mcName}</h2>
       <div className="grid grid-cols-2 grid-rows-1 gap-2 mt-2 text-sm">
         <a href={`https://hackclub.slack.com/team/${letter.slackID}`} target="_blank" className="bg-violet-400 p-2 rounded-xl"><FontAwesomeIcon icon={faMessage} /> Message</a>

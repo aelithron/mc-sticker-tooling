@@ -67,7 +67,10 @@ export async function getLetter(recordID: string): Promise<Letter> {
 export async function updateStatus(recordID: string, { status, fulfilled }: { status: "Approved" | "Confirmed" | "Pending" | "Flagged" | undefined, fulfilled: boolean | undefined }) {
   const table = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY || "" }).base(process.env.AIRTABLE_BASE_ID || "").table(process.env.AIRTABLE_TABLE_ID || "");
   try {
-    await table.update(recordID, { "Approval": status, "Fulfilled": fulfilled });
+    const update: { "Approval"?: string, "Fulfilled"?: boolean } = {};
+    if (status) update.Approval = status;
+    if (fulfilled !== undefined) update.Fulfilled = fulfilled;
+    await table.update(recordID, update);
     return true;
   } catch (e) {
     console.error(`Airtable Error - Couldn't change status for ${recordID} to ${status}\n${e}`);

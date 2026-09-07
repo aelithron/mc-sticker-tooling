@@ -13,7 +13,7 @@ export function OverrideStatus({ id }: { id: string }) {
       return;
     }
     try {
-      const res = await fetch(`/api/letter/${id}`, { method: "PATCH", body: JSON.stringify({ approval }) });
+      const res = await fetch(`/api/letter/${id}`, { method: "PATCH", body: JSON.stringify({ status: approval }) });
       const body = await res.json();
       if (body.error) {
         alert(`There was an error updating the letter: ${body.message} (${body.error})`);

@@ -4,9 +4,9 @@
 		{
 			"type": "npm",
 			"script": "dev",
-			"path": "fulfiller",
+			"path": "panel",
 			"problemMatcher": [],
-			"label": "npm: dev - fulfiller",
+			"label": "npm: dev - panel",
 			"detail": "next dev"
 		}
 	]

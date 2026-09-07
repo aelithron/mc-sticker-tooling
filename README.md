@@ -1,5 +1,10 @@
 # HC Minecraft Sticker Tooling ![IMG](https://hackatime-badge.hackclub.com/U08RJ1PEM7X/mc-sticker-tooling)
 My assorted work to make a cool pipeline for fulfilling the free stickers people get for finding diamonds on the Hack Club Minecraft server!
+
+<a href="https://notbyai.fyi" target="_blank">
+  <img src="not-by-ai.svg" alt="Developed by a human, not by AI!">
+</a>
+
 ## Parts
 This is a monorepo, so the code is split into a few parts!
 ### Web Panel ([`/panel`](https://github.com/aelithron/mc-sticker-tooling/tree/main/panel))
@@ -34,7 +39,7 @@ From there, get `AIRTABLE_BASE_ID` (which starts with "app") and `AIRTABLE_TABLE
     - If you are not using Socket Mode, set `SOCKET_MODE` to false. Then, replace `SLACK_APP_TOKEN` with `SLACK_SIGNING_SECRET` in the environment variable list, and set the value to the "Signing Secret" in your app settings. Uncomment the port from your deployment file/command, then set your Request URL on the "Interactivity & Shortcuts" page to `http://example.com:5000` (replacing example.com with your own domain).
 3. StickerSRV: Download the [StickerSRV plugin](https://github.com/aelithron/mc-sticker-tooling/releases/latest), and install it to your Minecraft server's `plugins/` folder. Note it is only compatible with Minecraft Java servers running PaperMC v1.21.11+ and running [HCCore](https://github.com/hackclub/HCCore). Then, start and stop your server, and change the key in `plugins/StickerSRV/config.yml`. Start your server again. Now, the `STICKERSRV_URL` is your server's URL and port (formatted as `http://example.com:4500`), and `STICKERSRV_KEY` is your API key in the config.
 4. Better Auth: Set `BETTER_AUTH_URL` to your web panel's address (formatted as `https://panel.example.com`, with a port if you are using one). Set `BETTER_AUTH_SECRET` to a randomly-generated string, which you can generate with `openssl rand -base64 32` if on macOS or Linux.
-5. Hack Club Auth: Make sure Developer Mode is enabled on your account [info page](https://auth.hackclub.com/identity/edit). Then, go to [the dev portal](https://auth.hackclub.com/developer/apps/new). In this form, set the Redirect URI to `https://panel.example.com/api/auth/oauth2/callback/hca`, and enable the folowing scopes: `openid`, `email`, `name`, and `profile`. Create your app, and then your `HCA_CLIENT_ID` and `HCA_CLIENT_SECRET` are visible on the page.
+5. Hack Club Auth: Make sure Developer Mode is enabled on your account [info page](https://auth.hackclub.com/identity/edit). Then, go to [the dev portal](https://auth.hackclub.com/developer/apps/new). In this form, set the Redirect URI to `https://panel.example.com/api/auth/oauth2/callback/hca` (replacing example.com with your domain), and enable the folowing scopes: `openid`, `email`, `name`, and `profile`. Create your app, and then your `HCA_CLIENT_ID` and `HCA_CLIENT_SECRET` are visible on the page.
 ### Deploy
 #### With Compose (Recommended)
 Save the following Docker Compose file as `compose.yml`. Make sure to fill in your environment variables! \
