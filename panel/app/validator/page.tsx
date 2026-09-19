@@ -1,7 +1,7 @@
 import loadTable from "@/utils/airtable";
 import { auth } from "@/utils/auth";
 import loadConfig from "@/utils/config";
-import { faArrowLeft, faCheck, faDatabase, faEnvelope, faFlag, faHome, faMessage } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faCheck, faDatabase, faEnvelope, faFlag, faHome, faMessage, faRefresh } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Metadata } from "next";
 import { headers } from "next/headers";
@@ -30,7 +30,10 @@ export default async function Page() {
     <main className="flex flex-col min-h-screen p-8 md:p-20 gap-2">
       <Link href={"/"} className="bg-violet-300 p-1 rounded-xl w-min hover:text-sky-500"><FontAwesomeIcon icon={faArrowLeft} /></Link>
       <h1 className="font-semibold text-3xl"><FontAwesomeIcon icon={faCheck} /> Validator</h1>
-      <ValidateLetters />
+      <div className="flex gap-2">
+        {!config.runningValidation ? <ValidateLetters /> : <p className="bg-violet-300 text-violet-500 py-1 px-2 gap-1 rounded-xl flex items-center w-fit"><FontAwesomeIcon icon={faRefresh} /> Validation running...</p>}
+        <a href={`https://airtable.com/${process.env.AIRTABLE_BASE_ID}/${process.env.AIRTABLE_TABLE_ID}`} target="_blank" className="bg-violet-400 py-1 px-2 rounded-xl flex w-fit items-center gap-1"><FontAwesomeIcon icon={faDatabase} /> Open Airtable</a>
+      </div>
       <h1 className="text-2xl font-semibold mt-4"><FontAwesomeIcon icon={faEnvelope} /> Pending Requests</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         {pending.map((letter) => <ValidatorCard letter={letter} key={letter.recordID} />)}
@@ -45,13 +48,20 @@ export default async function Page() {
   );
 }
 
-function ValidatorCard({ letter }: { letter: Letter }) {
+async function ValidatorCard({ letter }: { letter: Letter }) {
+  let comments: string[];
+  try {
+    const res = await fetch(`https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/${process.env.AIRTABLE_TABLE_ID}/${letter.recordID}/comments`);
+    comments = await res.json();
+  } catch (e) {
+    console.error(`Failed to load comments: ${e}`);
+  }
   return (
     <div key={letter.recordID} className="flex flex-col p-2 bg-violet-300 rounded-lg">
       <h2 className="font-semibold">{letter.mcName}</h2>
       <div className="grid grid-cols-2 grid-rows-1 gap-2 mt-2 text-sm">
         <a href={`https://hackclub.slack.com/team/${letter.slackID}`} target="_blank" className="bg-violet-400 p-2 rounded-xl"><FontAwesomeIcon icon={faMessage} /> Message</a>
-        <a href={`https://airtable.com/${process.env.AIRTABLE_BASE_ID}/${process.env.AIRTABLE_TABLE_ID}/${letter.recordID}?blocks=hide`} target="_blank" className="bg-violet-400 p-2 rounded-xl"><FontAwesomeIcon icon={faDatabase} /> Open Airtable</a>
+        <a href={`https://airtable.com/${process.env.AIRTABLE_BASE_ID}/${process.env.AIRTABLE_TABLE_ID}/${letter.recordID}?blocks=hide`} target="_blank" className="bg-violet-400 p-2 rounded-xl"><FontAwesomeIcon icon={faDatabase} /> Open in Airtable</a>
       </div>
       <div className="flex gap-2 text-sm mt-3 items-center">
         <p>Override Status:</p>

@@ -49,6 +49,7 @@ export function ValidateLetters() {
         return;
       }
       alert("The validator is running, please refresh the page in a few minutes!");
+      window.location.reload();
     } catch (e) {
       console.error(`Error updating the letter!\n${e}`);
       alert("There was an error starting the validator, please check your console for more info.");
