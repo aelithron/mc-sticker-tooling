@@ -13,7 +13,8 @@ export const Config = z.strictObject({
     zip: z.string(),
     name: z.string()
   }),
-  confirmedOnly: z.boolean()
+  confirmedOnly: z.boolean(),
+  runningValidation: z.boolean()
 });
 export default async function loadConfig(): Promise<z.Infer<typeof Config>> {
   const configPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '../config/config.json');
@@ -26,4 +27,11 @@ export default async function loadConfig(): Promise<z.Infer<typeof Config>> {
     await fs.chmod(configPath, 0o666);
   }
   return Config.parse(JSON.parse(await fs.readFile(configPath, "utf8")));
+}
+export async function setRunningValidator(status: boolean) {
+  const configPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '../config/config.json');
+  const config = await loadConfig();
+  config.runningValidation = status;
+  await fs.writeFile(configPath, JSON.stringify(config, null, 2));
+  await fs.chmod(configPath, 0o666);
 }

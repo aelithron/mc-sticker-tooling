@@ -3,6 +3,7 @@ export type Letter = {
   approval: "Approved" | "Confirmed" | "Flagged" | "Pending";
   slackID: string;
   mcName: string;
+  slackName: string;
   createdAt: Date;
   address: {
     street: string;
@@ -12,4 +13,14 @@ export type Letter = {
     zip: string;
     name: string;
   }
+}
+export type Verdict = {
+  approved: boolean,
+  errors: string[],
+  correctionNeeded: boolean
+}
+export type DedupeCache = {
+  recordID: string,
+  slackID: string,
+  mcName: string
 }

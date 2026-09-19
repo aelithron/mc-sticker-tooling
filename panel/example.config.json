@@ -8,5 +8,6 @@
     "zip": "",
     "country": ""
   },
-  "confirmedOnly": true
+  "confirmedOnly": true,
+  "runningValidation": false
 }
