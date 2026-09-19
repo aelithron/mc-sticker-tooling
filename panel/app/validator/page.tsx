@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { OverrideStatus } from "./validation.module";
+import { OverrideStatus, ValidateLetters } from "./validation.module";
 import { Letter } from "@/fulfiller";
 
 export const metadata: Metadata = { title: "Validator" }
@@ -29,8 +29,9 @@ export default async function Page() {
   return (
     <main className="flex flex-col min-h-screen p-8 md:p-20 gap-2">
       <Link href={"/"} className="bg-violet-300 p-1 rounded-xl w-min hover:text-sky-500"><FontAwesomeIcon icon={faArrowLeft} /></Link>
-      <h1 className="font-semibold text-3xl mb-4"><FontAwesomeIcon icon={faCheck} /> Validator</h1>
-      <h1 className="text-2xl font-semibold"><FontAwesomeIcon icon={faEnvelope} /> Pending Requests</h1>
+      <h1 className="font-semibold text-3xl"><FontAwesomeIcon icon={faCheck} /> Validator</h1>
+      <ValidateLetters />
+      <h1 className="text-2xl font-semibold mt-4"><FontAwesomeIcon icon={faEnvelope} /> Pending Requests</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         {pending.map((letter) => <ValidatorCard letter={letter} key={letter.recordID} />)}
         {pending.length === 0 && <p className="flex text-center">There are no pending letters! :3</p>}

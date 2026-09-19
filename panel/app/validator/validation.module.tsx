@@ -1,6 +1,6 @@
 "use client";
 
-import { faCaretRight } from "@fortawesome/free-solid-svg-icons";
+import { faCaretRight, faCheck } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 
@@ -38,11 +38,22 @@ export function OverrideStatus({ id }: { id: string }) {
     </form>
   )
 }
-/*
-export function ValidateLetter({ id }: { id: string }) {
-  async function handleValidate() {
 
+export function ValidateLetters() {
+  async function handleValidate() {
+    try {
+      const res = await fetch("/api/validate", { method: "PUT" });
+      const body = await res.json();
+      if (body.error) {
+        alert(`There was an error starting the validator: ${body.message} (${body.error})`);
+        return;
+      }
+      alert("The validator is running, please refresh the page in a few minutes!");
+    } catch (e) {
+      console.error(`Error updating the letter!\n${e}`);
+      alert("There was an error starting the validator, please check your console for more info.");
+      return;
+    }
   }
-  return <button></button>
+  return <button onClick={handleValidate} className="bg-violet-400 py-1 px-2 gap-1 rounded-xl flex items-center w-fit"><FontAwesomeIcon icon={faCheck} /> Validate Pending</button>
 }
-*/

@@ -3,7 +3,7 @@ import { auth } from "@/utils/auth";
 import loadConfig, { setRunningValidator } from "@/utils/config";
 import { NextRequest, NextResponse } from "next/server";
 import check from "./checker";
-export async function POST(req: NextRequest) {
+export async function PUT(req: NextRequest) {
   const session = await auth.api.getSession({ headers: req.headers });
   if (!session) return NextResponse.json({ error: "unauthorized", message: "You aren't signed in, please sign in to continue!" }, { status: 401 });
   const config = await loadConfig();
@@ -20,6 +20,7 @@ async function runValidation() {
     const caches = await loadValidatorCaches();
     for (const item of table) {
       try {
+        if (item.approval !== "Pending") continue;
         const verdict = await check(item, caches);
         await enterVerdict(item.recordID, verdict);
         if (verdict.correctionNeeded) await correctEntry(item);
