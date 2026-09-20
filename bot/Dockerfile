@@ -6,6 +6,8 @@ RUN mkdir /pnpm
 RUN apk update && apk add --no-cache libc6-compat
 RUN corepack enable && corepack prepare pnpm --activate
 RUN pnpm config set global-bin-dir /pnpm/bin --global
+ENV PNPM_HOME="/pnpm/bin"
+ENV PATH="$PNPM_HOME:$PATH"
 
 COPY package.json ./
 COPY pnpm-lock.yaml ./
