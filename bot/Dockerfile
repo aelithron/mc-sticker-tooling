@@ -8,6 +8,7 @@ RUN corepack enable && corepack prepare pnpm --activate
 
 COPY package.json ./
 COPY pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile && pnpm add -g typescript
 COPY src/ ./src/
 COPY tsconfig.json ./
