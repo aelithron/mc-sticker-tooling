@@ -136,6 +136,8 @@ jobs:
     defaults:
       run:
         working-directory: "./plugin"
+    outputs:
+      artifact-id: ${{ steps.upload-jar.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v6
       - name: Get Version
@@ -151,6 +153,7 @@ jobs:
         with:
           subject-path: "plugin/build/libs/*"
       - name: Upload JAR
+        id: upload-jar
         uses: actions/upload-artifact@v7
         env:
           VERSION: ${{ env.VERSION }}
@@ -181,7 +184,7 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         with:
-          name: "stickersrv-${{ env.VERSION }}"
+          artifact-ids: ${{ needs.plugin-build.outputs.artifact-id }}
           path: dist/
       - name: Release
         uses: softprops/action-gh-release@v2
