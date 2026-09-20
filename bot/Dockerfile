@@ -14,7 +14,7 @@ COPY tsconfig.json ./
 COPY bot.d.ts ./
 RUN pnpm run build
 
-EXPOSE 3000
-ENV PORT 3000
+EXPOSE 5000
+ENV PORT 5000
 LABEL org.opencontainers.image.source="https://github.com/aelithron/mc-sticker-tooling"
 CMD ["node", "dist/index.js"]

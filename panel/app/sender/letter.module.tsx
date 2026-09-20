@@ -2,7 +2,7 @@
 "use client"
 import type { Letter } from "@/fulfiller";
 import { Config } from "@/utils/config";
-import { faCheck, faFlag, faUndo, faWarning } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faArrowRight, faCheck, faFlag, faUndo, faWarning } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
@@ -131,23 +131,27 @@ export default function LetterUI() {
         <button onClick={async () => await undoLast()} disabled={lastLetter === undefined} className={`${lastLetter !== undefined ? "hover:text-sky-500" : "text-slate-400"}`}><FontAwesomeIcon icon={faUndo} /> undo last</button>
         {letter.approval === "Confirmed" ? <p className="text-emerald-500"><FontAwesomeIcon icon={faCheck} /> Confirmed</p> : <p className="text-orange-500"><FontAwesomeIcon icon={faWarning} /> {letter.approval}</p>}
       </div>
-      <div {...handlers} className="touch-pan-y bg-slate-100 p-8 shadow-2xl w-80 h-48 md:w-160 md:h-96 relative overflow-hidden">
+      <div {...handlers} className="touch-pan-y bg-slate-100 p-8 shadow-2xl w-90 h-48 md:w-180 md:h-96 relative overflow-hidden">
         <div className="absolute top-4 left-4 text-sm md:text-lg">
           <p>{config.returnAddress.name}</p>
           <p>{international ? config.returnAddress.street.toUpperCase() : config.returnAddress.street}</p>
           <p>{international ? config.returnAddress.city.toUpperCase() : config.returnAddress.city}, {international ? config.returnAddress.state.toUpperCase() : config.returnAddress.state} {config.returnAddress.zip.toUpperCase()}</p>
           {international && <p>{config.returnAddress.country.toUpperCase()}</p>}
         </div>
-        {international && <p className="text-lg absolute bottom-4 left-4">AIRMAIL / PAR AVION</p>}
-        <div className="absolute top-2/5 left-1/3 m-auto text-sm md:text-lg">
+        {international && <p className="text-sm md:text-lg absolute bottom-4 left-4">AIRMAIL / PAR AVION</p>}
+        <div className="absolute top-2/5 left-1/3 m-auto text-sm md:text-lg pr-1">
           <p>{letter.address.name}</p>
           <p>{international ? letter.address.street.toUpperCase() : letter.address.street}</p>
           <p>{international ? letter.address.city.toUpperCase() : letter.address.city}, {international ? letter.address.state.toUpperCase() : letter.address.state} {letter.address.zip}</p>
           {international && <p>{letter.address.country.split("(")[0].toUpperCase()}</p>}
         </div>
-        <div className="absolute top-4 right-4 w-16 h-12 md:w-24 md:h-18 bg-violet-300 rounded-xs" />
+        <div className="absolute top-4 right-4 w-16 h-12 md:w-24 md:h-18 bg-violet-300 rounded-xs flex flex-col"><p className="mx-auto my-auto">Stamp</p></div>
       </div>
       <p className="mt-4 text-sm text-slate-400">Record ID: {letter.recordID}</p>
+      <div className="flex flex-col gap-2 mt-4 bg-violet-300 rounded-xl p-2 items-center">
+        <p>Swipe <span className="font-semibold"><FontAwesomeIcon icon={faArrowLeft} /> left</span> to flag for review</p>
+        <p>Swipe <span className="font-semibold"><FontAwesomeIcon icon={faArrowRight} /> right</span> to mark fulfilled</p>
+      </div>
     </div>
   );
 }

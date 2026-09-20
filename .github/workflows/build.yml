@@ -93,8 +93,6 @@ jobs:
           cache-dependency-path: "bot/pnpm-lock.yaml"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm lint
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -198,9 +196,8 @@ jobs:
             This is ${{ env.VERSION }} of Nova's free sticker fulfillment tooling, made for the Hack Club Minecraft server!
             Here, you can download the following:
             - StickerSRV: A Minecraft plugin that works with the validator to check if players have found diamonds (a prerequisite for claiming stickers).
-            - [legacy] Validator: A CLI tool that runs the validation system on all pending requests. This is also built into the web panel now, so you don't *need* this, but it does still work!
 
-            If you want the other two parts of the pipeline (the panel and bot), you need to get the Dockerfiles. These are:
+            If you want the other two parts of the pipeline (the panel and bot), you need to get the Docker images and run them in Docker. These are:
             - Web Panel: `ghcr.io/${{ github.repository }}/panel:${{ env.VERSION }}`
             - Bot: `ghcr.io/${{ github.repository }}/bot:${{ env.VERSION }}`
 

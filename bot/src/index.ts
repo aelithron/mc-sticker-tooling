@@ -31,7 +31,7 @@ async function start() {
   app.logger.info(`is ready as ${selfInfo.user} (${selfInfo.user_id}) :D`);
   app.command((process.env.SLACK_CMD || "/send-sticker-dms"), async ({ command, ack, client }) => {
     ack();
-    if (command.user_id !== (process.env.OWNER_ID || "U08RJ1PEM7X")) {
+    if (command.user_id !== (process.env.OWNER_ID || "U08RJ1PEM7X") && (process.env.DEMO_ALLOW_ALL_SENDERS || "false").toLowerCase() !== "true") {
       await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, markdown_text: `you're not <@${process.env.OWNER_ID || "U08RJ1PEM7X"}>, silly! :sillybleh:\n(are you another minecraft admin? send a message in the admin channel about this)` });
       return;
     }
@@ -66,7 +66,7 @@ async function start() {
           { type: "text", text: ": " },
           { type: "emoji", name: "white_check_mark", unicode: "2705" },
           { type: "text", text: " Confirmed   |   If you still need to make changes, please DM " },
-          { type: "user", user_id: "U08RJ1PEM7X" },
+          { type: "user", user_id: (process.env.OWNER_ID || "U08RJ1PEM7X") },
           { type: "text", text: "." }
         ]
       }]
@@ -119,7 +119,7 @@ async function start() {
           { type: "text", text: ": " },
           { type: "emoji", name: "x", unicode: "274c" },
           { type: "text", text: " Cancelled   |   If you still need to make changes, please DM " },
-          { type: "user", user_id: "U08RJ1PEM7X" },
+          { type: "user", user_id: (process.env.OWNER_ID || "U08RJ1PEM7X") },
           { type: "text", text: "." }
         ]
       }]
@@ -164,7 +164,7 @@ async function start() {
           { type: "text", text: ": " },
           { type: "emoji", name: "white_check_mark", unicode: "2705" },
           { type: "text", text: " Confirmed (with edits)   |   If you still need to make changes, please DM " },
-          { type: "user", user_id: "U08RJ1PEM7X" },
+          { type: "user", user_id: (process.env.OWNER_ID || "U08RJ1PEM7X") },
           { type: "text", text: "." }
         ]
       }]
