@@ -23,7 +23,7 @@ jobs:
         run: echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
       - uses: pnpm/action-setup@v5
         with:
-          version: 11
+          version: 12
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -84,7 +84,7 @@ jobs:
         run: echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
       - uses: pnpm/action-setup@v5
         with:
-          version: 11
+          version: 12
       - uses: actions/setup-node@v6
         with:
           node-version: 24
