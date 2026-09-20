@@ -62,11 +62,10 @@ jobs:
           build-args: |
             IMAGE_TAG=${{ env.VERSION }}
       - name: Attest
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest@v4
         with:
           subject-name: ghcr.io/${{ github.repository }}/panel
           subject-digest: ${{ steps.build.outputs.digest }}
-          push-to-registry: true
 
   bot-build:
     name: Build Slack Bot
@@ -120,11 +119,10 @@ jobs:
             ghcr.io/${{ github.repository }}/bot:latest
             ghcr.io/${{ github.repository }}/bot:${{ env.VERSION }}
       - name: Attest
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest@v4
         with:
           subject-name: ghcr.io/${{ github.repository }}/bot
           subject-digest: ${{ steps.build.outputs.digest }}
-          push-to-registry: true
 
   plugin-build:
     name: Build Plugin (StickerSRV)
@@ -147,10 +145,9 @@ jobs:
       - name: Build JAR
         run: ./gradlew shadowJar
       - name: Attest
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest@v4
         with:
           subject-path: "plugin/build/libs/*"
-          push-to-registry: true
       - name: Upload JAR
         uses: actions/upload-artifact@v7
         env:
