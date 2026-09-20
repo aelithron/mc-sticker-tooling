@@ -175,7 +175,7 @@ jobs:
       - name: Prepare
         run: mkdir dist/
       - name: Download StickerSRV JAR
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         env:
           VERSION: ${{ env.VERSION }}
         with:
